@@ -250,7 +250,7 @@ invoiceNamingFunction := func(map[string]string, index int) string {
 }
 
 // Creates: INV-2024-001.docx, INV-2024-002.docx
-docx.ProcessDocxMultipleRecords("invoice_template.docx", "./invoices", multipleInvoiceData, invoiceNamingFunction)
+docx.ProcessDocxMultipleRecordsWithNames("invoice_template.docx", "./invoices", multipleInvoiceData, invoiceNamingFunction)
 ```
 
 ## Advanced Usage
@@ -314,22 +314,161 @@ outputPath := fmt.Sprintf("./clients/%s/contract.docx", clientName)
 -   Test templates with sample data before production use
 -   Consider using placeholder text that's obviously a placeholder and is not meant to be present in the final document (e.g., "REPLACE_WITH_CLIENT_NAME")
 
-### Performance Considerations:
+## Integration Examples
+
+## CLI Tool Integration
 
 ```go
-// For large documents, consider processing in chunks
-// Use ProcessDocxMulti for efficiency when replacing multiple keywords
-func ProcessLargeDocument(templatePath, outputPath string, data map[string]string) error {
-    // ProcessDocxMulti is more efficient than multiple ProcessDocxSingle calls
-    return docx.ProcessDocxMulti(templatePath, outputPath, data)
+package main
+
+import (
+    "flag"
+    "log"
+    "github.com/siliconcatalyst/officeforge/docx"
+)
+
+func main() {
+    var (
+        input       = flag.String("input", "", "Input DOCX file")
+        output      = flag.String("output", "", "Output DOCX file")
+        keyword     = flag.String("keyword", "", "Keyword to replace")
+        replacement = flag.String("replacement", "", "Replacement text")
+    )
+    flag.Parse()
+
+    err := docx.ProcessDocxSingle(*input, *output, *keyword, *replacement)
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 
-## Integration Examples
+### Usage Examples
 
-### Web Service Integration:
+```bash
+# Single replacement
+./cli-tool -input template.docx -output output.docx -keyword "{{NAME}}" -replacement "John Doe"
 
-### CLI Tool Integration:
+# Multiple replacements (build separate tool)
+./multi-tool -input template.docx -output output.docx -config replacements.json
+
+# Batch processing (build separate tool)
+./batch-tool -input template.docx -output-dir ./outputs -records data.json
+```
+
+### Multi-Replacement CLI Example
+
+```go
+package main
+
+import (
+    "encoding/json"
+    "flag"
+    "os"
+    "github.com/siliconcatalyst/officeforge/docx"
+
+)
+
+func main() {
+    var (
+        input  = flag.String("input", "", "Input DOCX file")
+        output = flag.String("output", "", "Output DOCX file")
+        config = flag.String("config", "", "JSON config file")
+    )
+    flag.Parse()
+
+    // Read replacements from JSON
+    data, _ := os.ReadFile(*config)
+    var replacements map[string]string
+    json.Unmarshal(data, &replacements)
+
+    err := docx.ProcessDocxMulti(*input, *output, replacements)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+## Configuration Examples
+
+### Single Replacement Config
+
+```json
+{
+	"template": "invoice_template.docx",
+	"output": "invoice_001.docx",
+	"keyword": "{{INVOICE_ID}}",
+	"replacement": "INV-2025-001"
+}
+```
+
+### Multi Replacement Config
+
+```json
+{
+	"template": "contract_template.docx",
+	"output": "contract_acme.docx",
+	"replacements": {
+		"{{CLIENT_NAME}}": "Acme Corporation",
+		"{{DATE}}": "2025-07-16",
+		"{{AMOUNT}}": "$50,000",
+		"{{DURATION}}": "12 months",
+		"{{PROJECT}}": "Website Development"
+	}
+}
+```
+
+### Batch Processing Config
+
+```json
+{
+	"template": "certificate_template.docx",
+	"output_dir": "./certificates",
+	"file_name_pattern": "certificate_%s.docx",
+	"records": [
+		{
+			"{{NAME}}": "John Doe",
+			"{{EMAIL}}": "john@example.com",
+			"{{COURSE}}": "Advanced Go Programming",
+			"{{DATE}}": "2025-07-16"
+		},
+		{
+			"{{NAME}}": "Jane Smith",
+			"{{EMAIL}}": "jane@example.com",
+			"{{COURSE}}": "Advanced Go Programming",
+			"{{DATE}}": "2025-07-16"
+		}
+	]
+}
+```
+
+## Error Handling Best Practices
+
+### CLI Error Handling
+
+```bash
+# Robust error handling in bash
+process_with_retry() {
+    local max_attempts=3
+    local attempt=1
+
+    while [ $attempt -le $max_attempts ]; do
+        echo "Attempt $attempt of $max_attempts"
+
+        if ./docx-processor single --input "$1" --output "$2" --keyword "$3" --replacement "$4"; then
+            echo "Success on attempt $attempt"
+            return 0
+        else
+            echo "Attempt $attempt failed"
+            ((attempt++))
+            sleep 2
+        fi
+    done
+
+    echo "All attempts failed"
+    return 1
+}
+```
 
 ## Common Issues and Solutions
 
