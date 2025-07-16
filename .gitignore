@@ -5,7 +5,7 @@
 *.so
 *.dylib
 
-# Output of "go build"
+# Output of `go build`
 /bin/
 /build/
 

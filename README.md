@@ -20,12 +20,20 @@ go get github.com/siliconcatalyst/officeforge
 
 This library provides two main functions for processing DOCX files with keyword replacements:
 
+## Import
+
+```go
+import (
+    "github.com/siliconcatalyst/officeforge/docx"
+)
+```
+
 ## Function 1: ProcessDocxSingle
 
 Creates a single output DOCX file with one keyword-replacement pair applied.
 
 ```go
-err := ProcessDocxSingle("contract.docx", "contract_john.docx", "CLIENT_NAME", "John Smith")
+err := docx.ProcessDocxSingle("contract.docx", "contract_john.docx", "CLIENT_NAME", "John Smith")
 ```
 
 ### Parameters:
@@ -46,16 +54,16 @@ err := ProcessDocxSingle("contract.docx", "contract_john.docx", "CLIENT_NAME", "
 
 ```go
 // Generate a personalized contract
-ProcessDocxSingle("template_contract.docx", "smith_contract.docx", "{{CLIENT}}", "John Smith")
+docx.ProcessDocxSingle("template_contract.docx", "smith_contract.docx", "{{CLIENT}}", "John Smith")
 
 // Create a customized letter
-ProcessDocxSingle("letter_template.docx", "welcome_letter.docx", "COMPANY_NAME", "Tech Solutions Inc.")
+docx.ProcessDocxSingle("letter_template.docx", "welcome_letter.docx", "COMPANY_NAME", "Tech Solutions Inc.")
 
 // Replace dates in documents
-ProcessDocxSingle("report.docx", "monthly_report.docx", "REPORT_DATE", "July 2024")
+docx.ProcessDocxSingle("report.docx", "monthly_report.docx", "REPORT_DATE", "July 2024")
 ```
 
-## Function 2: ProcessDocxBatch
+## Function 2: ProcessDocxMulti
 
 Creates a single output DOCX file with multiple keyword-replacement pairs applied simultaneously.
 
@@ -68,7 +76,7 @@ batchReplacements := map[string]string{
     "PROJECT_NAME":    "Website Development",
     "DEADLINE":        "2024-08-30",
 }
-err := ProcessDocxBatch("contract_template.docx", "completed_contract.docx", batchReplacements)
+err := docx.ProcessDocxMulti("contract_template.docx", "completed_contract.docx", batchReplacements)
 ```
 
 ### Parameters:
@@ -85,9 +93,7 @@ err := ProcessDocxBatch("contract_template.docx", "completed_contract.docx", bat
 -   Template processing where all variables should be replaced at once
 -   Contract generation with multiple client details
 
-### Example Scenarios:
-
-#### Complete Contract Generation:
+### Example Scenario:
 
 ```go
 contractData := map[string]string{
@@ -100,37 +106,151 @@ contractData := map[string]string{
     "PROJECT_DEADLINE":   "2024-08-30",
     "PAYMENT_TERMS":      "Net 30",
 }
-ProcessDocxBatch("contract_template.docx", "john_smith_contract.docx", contractData)
+docx.ProcessDocxMulti("contract_template.docx", "john_smith_contract.docx", contractData)
 ```
 
-#### Invoice Generation:
+## Function 3: ProcessDocxMultipleRecords
+
+Creates multiple outputs (docx files) for each record, with keyword-replacement pairs applied simultaneously to each record
 
 ```go
-invoiceData := map[string]string{
-    "INVOICE_NUMBER":     "INV-2024-001",
-    "INVOICE_DATE":       "2024-07-16",
-    "CLIENT_NAME":        "ABC Corporation",
-    "CLIENT_ADDRESS":     "456 Business Ave, Suite 100",
-    "TOTAL_AMOUNT":       "$2,500.00",
-    "DUE_DATE":           "2024-08-16",
-    "DESCRIPTION":        "Web Development Services",
-}
-ProcessDocxBatch("invoice_template.docx", "invoice_001.docx", invoiceData)
+records := []map[string]string{
+		{
+			"CLIENT_NAME":     "John Smith",
+			"COMPANY_NAME":    "Smith Industries",
+			"CONTRACT_DATE":   "2024-07-16",
+			"CONTRACT_AMOUNT": "$5,000",
+			"PROJECT_NAME":    "Website Development",
+			"DEADLINE":        "2024-08-30",
+		},
+		{
+			"CLIENT_NAME":     "John Doe",
+			"COMPANY_NAME":    "Doe Industries",
+			"CONTRACT_DATE":   "2024-03-06",
+			"CONTRACT_AMOUNT": "$4,300",
+			"PROJECT_NAME":    "Backend Development",
+			"DEADLINE":        "2024-02-28",
+		},
+	}
+
+	// Creates: contract_1.docx, contract_2.docx
+	err := docx.ProcessDocxMultipleRecords("contract_template.docx", "./contracts", records, "contract_%d.docx")
 ```
 
-#### Employee Document Generation:
+### Parameters:
+
+-   `inputPath` (string): Path to the source DOCX template file
+-   `outputPath` (string): Path where the final DOCX file with all replacements will be saved
+-   `record` ([]map[string]string): Dynamically sliced map where keys are keywords to find and values are replacement text
+-   `fileNamePattern` (string): Printf-style pattern for naming files (e.g., `"contract_%d.docx`)
+
+### Use Cases:
+
+-   Creating multiple fully populated documents from a single template
+-   Document generating for multiple records simultaneously
+
+### Example Scenario:
 
 ```go
-employeeData := map[string]string{
-    "EMPLOYEE_NAME":      "Jane Doe",
-    "EMPLOYEE_ID":        "EMP-2024-001",
-    "DEPARTMENT":         "Engineering",
-    "START_DATE":         "2024-07-16",
-    "SALARY":             "$75,000",
-    "MANAGER_NAME":       "Bob Johnson",
-    "OFFICE_LOCATION":    "New York",
+multipleInvoiceData := []map[string]string{
+    {
+        "INVOICE_DATE":       "2024-07-16",
+        "CLIENT_NAME":        "ABC Corporation",
+        "CLIENT_ADDRESS":     "456 Business Ave, Suite 100",
+        "TOTAL_AMOUNT":       "$2,500.00",
+        "DUE_DATE":           "2024-08-16",
+        "DESCRIPTION":        "Web Development Services",
+    },
+    {
+        "INVOICE_DATE":       "2024-07-23",
+        "CLIENT_NAME":        "DEF Corporation",
+        "CLIENT_ADDRESS":     "456 Business Ave, Suite 112",
+        "TOTAL_AMOUNT":       "$1,230.00",
+        "DUE_DATE":           "2024-09-01",
+        "DESCRIPTION":        "Web Development Services",
+    }
 }
-ProcessDocxBatch("employee_contract.docx", "jane_doe_contract.docx", employeeData)
+
+// Creates: invoice_1.docx, invoice_2.docx
+docx.ProcessDocxMultipleRecords("invoice_template.docx", "./invoices", multipleInvoiceData, "invoice_%d.docx")
+```
+
+## Function 4: ProcessDocxMultipleRecordsWithNames
+
+Creates multiple outputs (docx files) for each record, with keyword-replacement pairs applied simultaneously to each record, with a custom naming function
+
+```go
+records := []map[string]string{
+    {
+        "CLIENT_NAME":     "John Smith",
+        "COMPANY_NAME":    "Smith Industries",
+        "CONTRACT_DATE":   "2024-07-16",
+        "CONTRACT_AMOUNT": "$5,000",
+        "PROJECT_NAME":    "Website Development",
+        "DEADLINE":        "2024-08-30",
+    },
+    {
+        "CLIENT_NAME":     "John Doe",
+        "COMPANY_NAME":    "Doe Industries",
+        "CONTRACT_DATE":   "2024-03-06",
+        "CONTRACT_AMOUNT": "$4,300",
+        "PROJECT_NAME":    "Backend Development",
+        "DEADLINE":        "2024-02-28",
+    },
+}
+
+nameFunc := func(record map[string]string, index int) string {
+    clientName := strings.ReplaceAll(record["CLIENT_NAME"], " ", "_")
+    return fmt.Sprintf("contract_%s_%d.docx", strings.ToLower(clientName), index)
+}
+
+// Creates: contract_john_smith_1.docx, contract_john_doe_2.docx
+err := docx.ProcessDocxMultipleRecordsWithNames("contract_template.docx", "./contracts", records, nameFunc)
+```
+
+### Parameters:
+
+-   `inputPath` (string): Path to the source DOCX template file
+-   `outputPath` (string): Path where the final DOCX file with all replacements will be saved
+-   `record` ([]map[string]string): Dynamically sliced map where keys are keywords to find and values are replacement text
+-   `nameFunc` func(map[string]string, int): Custom function to customize the naming of the output files
+
+### Use Cases:
+
+-   Creating multiple fully populated documents from a single template
+-   Document generating for multiple records simultaneously
+-   The use case calls for a custom naming convention instead of the simple Printf-style naming provided by ProcessDocxMultipleRecords
+
+### Example Scenario:
+
+```go
+multipleInvoiceData := []map[string]string{
+    {
+        "INVOICE_NUMBER":     "INV-2024-001",
+        "INVOICE_DATE":       "2024-07-16",
+        "CLIENT_NAME":        "ABC Corporation",
+        "CLIENT_ADDRESS":     "456 Business Ave, Suite 100",
+        "TOTAL_AMOUNT":       "$2,500.00",
+        "DUE_DATE":           "2024-08-16",
+        "DESCRIPTION":        "Web Development Services",
+    },
+    {
+        "INVOICE_NUMBER":     "INV-2024-002",
+        "INVOICE_DATE":       "2024-07-23",
+        "CLIENT_NAME":        "DEF Corporation",
+        "CLIENT_ADDRESS":     "456 Business Ave, Suite 112",
+        "TOTAL_AMOUNT":       "$1,230.00",
+        "DUE_DATE":           "2024-09-01",
+        "DESCRIPTION":        "Web Development Services",
+    }
+}
+
+invoiceNamingFunction := func(map[string]string, index int) string {
+    return record["INVOICE_NUMBER"] + ".docx"
+}
+
+// Creates: INV-2024-001.docx, INV-2024-002.docx
+docx.ProcessDocxMultipleRecords("invoice_template.docx", "./invoices", multipleInvoiceData, invoiceNamingFunction)
 ```
 
 ## Advanced Usage
@@ -138,13 +258,13 @@ ProcessDocxBatch("employee_contract.docx", "jane_doe_contract.docx", employeeDat
 ### Error Handling:
 
 ```go
-err := ProcessDocxSingle("input.docx", "output.docx", "KEYWORD", "replacement")
+err := docx.ProcessDocxSingle("input.docx", "output.docx", "KEYWORD", "replacement")
 if err != nil {
     log.Printf("Processing failed: %v", err)
     // Handle error appropriately
 }
 
-err = ProcessDocxBatch("template.docx", "output.docx", replacements)
+err = docx.ProcessDocxMulti("template.docx", "output.docx", replacements)
 if err != nil {
     log.Printf("Batch processing failed: %v", err)
     // Handle error appropriately
@@ -192,18 +312,24 @@ outputPath := fmt.Sprintf("./clients/%s/contract.docx", clientName)
 -   Keep templates simple and well-formatted
 -   Use clear, descriptive keyword names
 -   Test templates with sample data before production use
--   Consider using placeholder text that's obviously fake (e.g., "REPLACE_WITH_CLIENT_NAME")
+-   Consider using placeholder text that's obviously a placeholder and is not meant to be present in the final document (e.g., "REPLACE_WITH_CLIENT_NAME")
 
 ### Performance Considerations:
 
 ```go
 // For large documents, consider processing in chunks
-// Use ProcessDocxBatch for efficiency when replacing multiple keywords
+// Use ProcessDocxMulti for efficiency when replacing multiple keywords
 func ProcessLargeDocument(templatePath, outputPath string, data map[string]string) error {
-    // ProcessDocxBatch is more efficient than multiple ProcessDocxSingle calls
-    return ProcessDocxBatch(templatePath, outputPath, data)
+    // ProcessDocxMulti is more efficient than multiple ProcessDocxSingle calls
+    return docx.ProcessDocxMulti(templatePath, outputPath, data)
 }
 ```
+
+## Integration Examples
+
+### Web Service Integration:
+
+### CLI Tool Integration:
 
 ## Common Issues and Solutions
 
@@ -226,130 +352,3 @@ func ProcessLargeDocument(templatePath, outputPath string, data map[string]strin
 ### Issue: Memory usage with large files
 
 **Solution**: Process documents individually rather than in large batches
-
-## Integration Examples
-
-### Web Service Integration:
-
-```go
-func handleSingleReplacement(w http.ResponseWriter, r *http.Request) {
-    keyword := r.FormValue("keyword")
-    replacement := r.FormValue("replacement")
-
-    outputPath := fmt.Sprintf("./temp/%s.docx", uuid.New().String())
-    err := ProcessDocxSingle("template.docx", outputPath, keyword, replacement)
-
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    http.ServeFile(w, r, outputPath)
-}
-
-func handleBatchReplacement(w http.ResponseWriter, r *http.Request) {
-    // Parse JSON request body containing replacements map
-    var replacements map[string]string
-    if err := json.NewDecoder(r.Body).Decode(&replacements); err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-
-    outputPath := fmt.Sprintf("./temp/%s.docx", uuid.New().String())
-    err := ProcessDocxBatch("template.docx", outputPath, replacements)
-
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    http.ServeFile(w, r, outputPath)
-}
-```
-
-### CLI Tool Integration:
-
-```go
-func main() {
-    if len(os.Args) < 2 {
-        log.Fatal("Usage: docx-processor <command> [args...]")
-    }
-
-    command := os.Args[1]
-
-    switch command {
-    case "single":
-        if len(os.Args) < 6 {
-            log.Fatal("Usage: docx-processor single <input> <output> <keyword> <replacement>")
-        }
-        err := ProcessDocxSingle(os.Args[2], os.Args[3], os.Args[4], os.Args[5])
-        if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Println("Single replacement completed successfully!")
-
-    case "batch":
-        if len(os.Args) < 5 {
-            log.Fatal("Usage: docx-processor batch <input> <output> <replacements.json>")
-        }
-
-        // Read replacements from JSON file
-        data, err := os.ReadFile(os.Args[4])
-        if err != nil {
-            log.Fatal(err)
-        }
-
-        var replacements map[string]string
-        if err := json.Unmarshal(data, &replacements); err != nil {
-            log.Fatal(err)
-        }
-
-        err = ProcessDocxBatch(os.Args[2], os.Args[3], replacements)
-        if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Println("Batch replacement completed successfully!")
-
-    default:
-        log.Fatal("Unknown command. Use 'single' or 'batch'")
-    }
-}
-```
-
-### Configuration File Support:
-
-```go
-type DocumentConfig struct {
-    Template     string            `json:"template"`
-    Output       string            `json:"output"`
-    Replacements map[string]string `json:"replacements"`
-}
-
-func ProcessFromConfig(configPath string) error {
-    data, err := os.ReadFile(configPath)
-    if err != nil {
-        return err
-    }
-
-    var config DocumentConfig
-    if err := json.Unmarshal(data, &config); err != nil {
-        return err
-    }
-
-    return ProcessDocxBatch(config.Template, config.Output, config.Replacements)
-}
-```
-
-Example configuration file (`config.json`):
-
-```json
-{
-	"template": "contract_template.docx",
-	"output": "final_contract.docx",
-	"replacements": {
-		"CLIENT_NAME": "John Smith",
-		"CONTRACT_DATE": "2024-07-16",
-		"AMOUNT": "$5,000"
-	}
-}
-```
