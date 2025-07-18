@@ -16,9 +16,23 @@
 go get github.com/siliconcatalyst/officeforge
 ```
 
+# Performance
+
+-   #### 12,000 words replaced in approx. 1 second
+
+![Full screenshot](./full_test.png)
+
+-   #### Document used to get the result
+
+![Word document](./document.png)
+
+-   #### Closeup of document word count
+
+![Word document word count](./word_count.png)
+
 # Usage
 
-This library provides two main functions for processing DOCX files with keyword replacements:
+This library provides four main functions for processing DOCX files with keyword replacements:
 
 ## Import
 
