@@ -13,7 +13,7 @@
 # Installation
 
 ```bash
-go get github.com/siliconcatalyst/officeforge
+go get github.com/siliconcatalyst/officeforge@latest
 ```
 
 # Performance
