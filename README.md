@@ -1,507 +1,641 @@
 # OfficeForge
 
-**OfficeForge** – A pure Go library for generating Word, Excel, and PowerPoint documents with zero external dependencies. Built on the standard library for maximum portability, security, and control.
+[![Go Version](https://img.shields.io/github/go-mod/go-version/siliconcatalyst/officeforge)](https://go.dev/)
+[![Release](https://img.shields.io/github/v/release/siliconcatalyst/officeforge)](https://github.com/siliconcatalyst/officeforge/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/siliconcatalyst/officeforge)](https://goreportcard.com/report/github.com/siliconcatalyst/officeforge)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# Features
+**OfficeForge** – A pure Go library and CLI for generating Word, Excel, and PowerPoint documents with zero external dependencies. Built on the standard library for maximum portability, security, and control.
 
--   Create and manipulate Word, Excel, and PowerPoint files
--   Zero external libraries — just `zip`, `xml`, and `bytes`
--   Fast, portable, and secure
--   Ideal for server-side automation or static document generation
--   Boosts adminstrative tasks by automating the creation of documents that rely on external data (Client information, Statistics, Data, Graphs)
+## ✨ Features
 
-# Installation
+- 🚀 **Zero Dependencies** – Pure Go using only `zip`, `xml`, and `bytes`
+- ⚡ **High Performance** – Process 12,000+ word replacements per second
+- 🔧 **Dual Interface** – Use as a Go library or standalone CLI tool
+- 🌍 **Cross-Platform** – Works on Windows, macOS, and Linux
+- 🔒 **Secure** – No external dependencies means smaller attack surface
+- 📦 **Easy Integration** – Works with any programming language via CLI
+
+## 📊 Performance
+
+- **12,000 words replaced in ~1 second**
+
+![Performance Test](./full_test.png)
+
+<details>
+<summary>View test document details</summary>
+
+![Word Document](./document.png)
+![Word Count](./word_count.png)
+
+</details>
+
+## 📥 Installation
+
+### As a CLI Tool (Recommended for Non-Go Users)
+
+**Option 1: Download Pre-built Binary**
+
+Download the latest binary for your platform from the [Releases page](https://github.com/siliconcatalyst/officeforge/releases):
+
+```bash
+# macOS (Apple Silicon)
+curl -L https://github.com/siliconcatalyst/officeforge/releases/latest/download/officeforge-darwin-arm64 -o officeforge
+chmod +x officeforge
+sudo mv officeforge /usr/local/bin/
+
+# macOS (Intel)
+curl -L https://github.com/siliconcatalyst/officeforge/releases/latest/download/officeforge-darwin-amd64 -o officeforge
+chmod +x officeforge
+sudo mv officeforge /usr/local/bin/
+
+# Linux
+curl -L https://github.com/siliconcatalyst/officeforge/releases/latest/download/officeforge-linux-amd64 -o officeforge
+chmod +x officeforge
+sudo mv officeforge /usr/local/bin/
+
+# Windows (PowerShell)
+# Download officeforge-windows-amd64.exe from releases
+# Add to PATH or run directly
+```
+
+**Option 2: Install via Go**
+
+```bash
+go install github.com/siliconcatalyst/officeforge/cmd/officeforge@latest
+```
+
+### As a Go Library
 
 ```bash
 go get github.com/siliconcatalyst/officeforge@latest
 ```
 
-# Performance
+## 🚀 Quick Start
 
--   #### 12,000 words replaced in approx. 1 second
+### CLI Usage
 
-![Full screenshot](./full_test.png)
+```bash
+# Single keyword replacement
+officeforge single \
+  --input template.docx \
+  --output contract.docx \
+  --key "{{NAME}}" \
+  --value "John Doe"
 
--   #### Document used to get the result
+# Multiple replacements from JSON
+officeforge multi \
+  --input template.docx \
+  --output contract.docx \
+  --data replacements.json
 
-![Word document](./document.png)
+# Batch generation from CSV
+officeforge batch \
+  --input template.docx \
+  --output ./contracts \
+  --data employees.csv \
+  --pattern "{NAME}_contract.docx"
+```
 
--   #### Closeup of document word count
-
-![Word document word count](./word_count.png)
-
-# Usage
-
-This library provides four main functions for processing DOCX files with keyword replacements:
-
-## Import
+### Library Usage
 
 ```go
-import (
-    "github.com/siliconcatalyst/officeforge/docx"
+import "github.com/siliconcatalyst/officeforge/docx"
+
+// Single replacement
+docx.ProcessDocxSingle("template.docx", "output.docx", "{{NAME}}", "John Doe")
+
+// Multiple replacements
+replacements := map[string]string{
+    "{{NAME}}":  "John Doe",
+    "{{EMAIL}}": "john@example.com",
+    "{{DATE}}":  "2024-12-04",
+}
+docx.ProcessDocxMulti("template.docx", "output.docx", replacements)
+```
+
+## 📖 CLI Documentation
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `single` | Replace a single keyword in a template |
+| `multi` | Replace multiple keywords from a JSON file |
+| `batch` | Generate multiple documents from CSV/JSON data |
+| `version` | Display version information |
+| `help` | Show help message |
+
+### Single Replacement
+
+Replace one keyword in a template document.
+
+```bash
+officeforge single \
+  --input template.docx \
+  --output result.docx \
+  --key "{{CLIENT}}" \
+  --value "Acme Corporation"
+```
+
+**Flags:**
+- `--input, -i`: Path to template DOCX file (required)
+- `--output, -o`: Path for output file (required)
+- `--key, -k`: Keyword to replace (required)
+- `--value, -v`: Replacement value (required)
+
+### Multiple Replacements
+
+Replace multiple keywords using a JSON configuration file.
+
+**Create `data.json`:**
+```json
+{
+  "{{NAME}}": "John Doe",
+  "{{EMAIL}}": "john@example.com",
+  "{{PHONE}}": "555-1234",
+  "{{COMPANY}}": "Tech Solutions Inc.",
+  "{{DATE}}": "2024-12-04"
+}
+```
+
+**Run command:**
+```bash
+officeforge multi \
+  --input template.docx \
+  --output completed_form.docx \
+  --data data.json
+```
+
+**Flags:**
+- `--input, -i`: Path to template DOCX file (required)
+- `--output, -o`: Path for output file (required)
+- `--data, -d`: Path to JSON file with replacements (required)
+
+### Batch Processing
+
+Generate multiple documents from CSV or JSON data.
+
+**Create `employees.csv`:**
+```csv
+NAME,EMAIL,PHONE,POSITION,START_DATE
+John Doe,john@company.com,555-1234,Engineer,2024-01-15
+Jane Smith,jane@company.com,555-5678,Manager,2024-02-20
+Bob Johnson,bob@company.com,555-9999,Designer,2024-03-10
+```
+
+**Run command:**
+```bash
+officeforge batch \
+  --input contract_template.docx \
+  --output ./contracts \
+  --data employees.csv \
+  --pattern "{NAME}_contract.docx"
+```
+
+**With JSON data (`records.json`):**
+```json
+[
+  {
+    "{{NAME}}": "John Doe",
+    "{{EMAIL}}": "john@example.com",
+    "{{POSITION}}": "Software Engineer"
+  },
+  {
+    "{{NAME}}": "Jane Smith",
+    "{{EMAIL}}": "jane@example.com",
+    "{{POSITION}}": "Product Manager"
+  }
+]
+```
+
+```bash
+officeforge batch \
+  --input template.docx \
+  --output ./output \
+  --data records.json
+```
+
+**Flags:**
+- `--input, -i`: Path to template DOCX file (required)
+- `--output, -o`: Output directory path (required)
+- `--data, -d`: Path to CSV or JSON file (required)
+- `--pattern, -p`: File naming pattern (optional, defaults to `document_N.docx`)
+
+**Pattern Examples:**
+- `{NAME}_contract.docx` → `John_Doe_contract.docx`
+- `{EMAIL}_{DATE}.docx` → `john@example.com_2024-12-04.docx`
+- `invoice_{ID}.docx` → `invoice_001.docx`
+
+## 📚 Library Documentation
+
+### Import
+
+```go
+import "github.com/siliconcatalyst/officeforge/docx"
+```
+
+### Function 1: ProcessDocxSingle
+
+Replace a single keyword in a document.
+
+```go
+func ProcessDocxSingle(inputPath, outputPath, keyword, replacement string) error
+```
+
+**Example:**
+```go
+err := docx.ProcessDocxSingle(
+    "contract_template.docx",
+    "contract_john_smith.docx",
+    "{{CLIENT_NAME}}",
+    "John Smith",
+)
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+**Use Cases:**
+- Quick personalization of documents
+- Testing individual replacements
+- Simple one-off document generation
+
+### Function 2: ProcessDocxMulti
+
+Replace multiple keywords in a document.
+
+```go
+func ProcessDocxMulti(inputPath, outputPath string, replacements map[string]string) error
+```
+
+**Example:**
+```go
+contractData := map[string]string{
+    "{{CLIENT_NAME}}":     "John Smith",
+    "{{CLIENT_ADDRESS}}":  "123 Main St, City, State 12345",
+    "{{CONTRACT_DATE}}":   "2024-12-04",
+    "{{CONTRACT_AMOUNT}}": "$5,000",
+    "{{PROJECT_NAME}}":    "Website Development",
+    "{{DEADLINE}}":        "2024-12-31",
+}
+
+err := docx.ProcessDocxMulti(
+    "contract_template.docx",
+    "john_smith_contract.docx",
+    contractData,
 )
 ```
 
-## Function 1: ProcessDocxSingle
+**Use Cases:**
+- Mail merge operations
+- Form filling
+- Complete document population
+- Contract generation
 
-Creates a single output DOCX file with one keyword-replacement pair applied.
+### Function 3: ProcessDocxMultipleRecords
 
-```go
-err := docx.ProcessDocxSingle("contract.docx", "contract_john.docx", "CLIENT_NAME", "John Smith")
-```
-
-### Parameters:
-
--   `inputPath` (string): Path to the source DOCX file that contains the keywords to be replaced
--   `outputPath` (string): Path where the new DOCX file with replacements will be saved
--   `keyword` (string): The exact text string to search for in the document
--   `replacement` (string): The text that will replace all instances of the keyword
-
-### Use Cases:
-
--   Creating personalized documents from templates
--   Generating single contracts or letters with specific details
--   Quick one-off document customization
--   Testing individual replacements before batch processing
-
-### Example Scenarios:
+Generate multiple documents with sequential naming.
 
 ```go
-// Generate a personalized contract
-docx.ProcessDocxSingle("template_contract.docx", "smith_contract.docx", "{{CLIENT}}", "John Smith")
-
-// Create a customized letter
-docx.ProcessDocxSingle("letter_template.docx", "welcome_letter.docx", "COMPANY_NAME", "Tech Solutions Inc.")
-
-// Replace dates in documents
-docx.ProcessDocxSingle("report.docx", "monthly_report.docx", "REPORT_DATE", "July 2024")
+func ProcessDocxMultipleRecords(
+    inputPath, outputDir string,
+    records []map[string]string,
+    fileNamePattern string,
+) error
 ```
 
-## Function 2: ProcessDocxMulti
-
-Creates a single output DOCX file with multiple keyword-replacement pairs applied simultaneously.
-
-```go
-batchReplacements := map[string]string{
-    "CLIENT_NAME":     "John Smith",
-    "COMPANY_NAME":    "Smith Industries",
-    "CONTRACT_DATE":   "2024-07-16",
-    "CONTRACT_AMOUNT": "$5,000",
-    "PROJECT_NAME":    "Website Development",
-    "DEADLINE":        "2024-08-30",
-}
-err := docx.ProcessDocxMulti("contract_template.docx", "completed_contract.docx", batchReplacements)
-```
-
-### Parameters:
-
--   `inputPath` (string): Path to the source DOCX template file
--   `outputPath` (string): Path where the final DOCX file with all replacements will be saved
--   `replacements` (map[string]string): Map where keys are keywords to find and values are replacement text
-
-### Use Cases:
-
--   Creating fully populated documents from templates
--   Mail merge-style operations for complete document generation
--   Form filling where multiple fields need to be replaced
--   Template processing where all variables should be replaced at once
--   Contract generation with multiple client details
-
-### Example Scenario:
-
-```go
-contractData := map[string]string{
-    "CLIENT_NAME":        "John Smith",
-    "CLIENT_ADDRESS":     "123 Main St, City, State 12345",
-    "CLIENT_EMAIL":       "john.smith@email.com",
-    "CONTRACT_DATE":      "2024-07-16",
-    "CONTRACT_AMOUNT":    "$5,000",
-    "PROJECT_NAME":       "Website Development",
-    "PROJECT_DEADLINE":   "2024-08-30",
-    "PAYMENT_TERMS":      "Net 30",
-}
-docx.ProcessDocxMulti("contract_template.docx", "john_smith_contract.docx", contractData)
-```
-
-## Function 3: ProcessDocxMultipleRecords
-
-Creates multiple outputs (docx files) for each record, with keyword-replacement pairs applied simultaneously to each record
-
-```go
-records := []map[string]string{
-		{
-			"CLIENT_NAME":     "John Smith",
-			"COMPANY_NAME":    "Smith Industries",
-			"CONTRACT_DATE":   "2024-07-16",
-			"CONTRACT_AMOUNT": "$5,000",
-			"PROJECT_NAME":    "Website Development",
-			"DEADLINE":        "2024-08-30",
-		},
-		{
-			"CLIENT_NAME":     "John Doe",
-			"COMPANY_NAME":    "Doe Industries",
-			"CONTRACT_DATE":   "2024-03-06",
-			"CONTRACT_AMOUNT": "$4,300",
-			"PROJECT_NAME":    "Backend Development",
-			"DEADLINE":        "2024-02-28",
-		},
-	}
-
-	// Creates: contract_1.docx, contract_2.docx
-	err := docx.ProcessDocxMultipleRecords("contract_template.docx", "./contracts", records, "contract_%d.docx")
-```
-
-### Parameters:
-
--   `inputPath` (string): Path to the source DOCX template file
--   `outputPath` (string): Path where the final DOCX file with all replacements will be saved
--   `record` ([]map[string]string): Dynamically sliced map where keys are keywords to find and values are replacement text
--   `fileNamePattern` (string): Printf-style pattern for naming files (e.g., `"contract_%d.docx`)
-
-### Use Cases:
-
--   Creating multiple fully populated documents from a single template
--   Document generating for multiple records simultaneously
-
-### Example Scenario:
-
-```go
-multipleInvoiceData := []map[string]string{
-    {
-        "INVOICE_DATE":       "2024-07-16",
-        "CLIENT_NAME":        "ABC Corporation",
-        "CLIENT_ADDRESS":     "456 Business Ave, Suite 100",
-        "TOTAL_AMOUNT":       "$2,500.00",
-        "DUE_DATE":           "2024-08-16",
-        "DESCRIPTION":        "Web Development Services",
-    },
-    {
-        "INVOICE_DATE":       "2024-07-23",
-        "CLIENT_NAME":        "DEF Corporation",
-        "CLIENT_ADDRESS":     "456 Business Ave, Suite 112",
-        "TOTAL_AMOUNT":       "$1,230.00",
-        "DUE_DATE":           "2024-09-01",
-        "DESCRIPTION":        "Web Development Services",
-    }
-}
-
-// Creates: invoice_1.docx, invoice_2.docx
-docx.ProcessDocxMultipleRecords("invoice_template.docx", "./invoices", multipleInvoiceData, "invoice_%d.docx")
-```
-
-## Function 4: ProcessDocxMultipleRecordsWithNames
-
-Creates multiple outputs (docx files) for each record, with keyword-replacement pairs applied simultaneously to each record, with a custom naming function
-
+**Example:**
 ```go
 records := []map[string]string{
     {
-        "CLIENT_NAME":     "John Smith",
-        "COMPANY_NAME":    "Smith Industries",
-        "CONTRACT_DATE":   "2024-07-16",
-        "CONTRACT_AMOUNT": "$5,000",
-        "PROJECT_NAME":    "Website Development",
-        "DEADLINE":        "2024-08-30",
+        "{{CLIENT_NAME}}":     "John Smith",
+        "{{CONTRACT_DATE}}":   "2024-12-04",
+        "{{CONTRACT_AMOUNT}}": "$5,000",
     },
     {
-        "CLIENT_NAME":     "John Doe",
-        "COMPANY_NAME":    "Doe Industries",
-        "CONTRACT_DATE":   "2024-03-06",
-        "CONTRACT_AMOUNT": "$4,300",
-        "PROJECT_NAME":    "Backend Development",
-        "DEADLINE":        "2024-02-28",
+        "{{CLIENT_NAME}}":     "Jane Doe",
+        "{{CONTRACT_DATE}}":   "2024-12-05",
+        "{{CONTRACT_AMOUNT}}": "$7,500",
+    },
+}
+
+// Creates: contract_1.docx, contract_2.docx
+err := docx.ProcessDocxMultipleRecords(
+    "contract_template.docx",
+    "./contracts",
+    records,
+    "contract_%d.docx",
+)
+```
+
+**Use Cases:**
+- Bulk document generation
+- Certificate creation
+- Invoice generation
+- Report automation
+
+### Function 4: ProcessDocxMultipleRecordsWithNames
+
+Generate multiple documents with custom naming function.
+
+```go
+func ProcessDocxMultipleRecordsWithNames(
+    inputPath, outputDir string,
+    records []map[string]string,
+    nameFunc func(map[string]string, int) string,
+) error
+```
+
+**Example:**
+```go
+records := []map[string]string{
+    {
+        "{{INVOICE_NUMBER}}": "INV-2024-001",
+        "{{CLIENT_NAME}}":    "ABC Corporation",
+        "{{TOTAL_AMOUNT}}":   "$2,500.00",
+    },
+    {
+        "{{INVOICE_NUMBER}}": "INV-2024-002",
+        "{{CLIENT_NAME}}":    "XYZ Industries",
+        "{{TOTAL_AMOUNT}}":   "$3,750.00",
     },
 }
 
 nameFunc := func(record map[string]string, index int) string {
-    clientName := strings.ReplaceAll(record["CLIENT_NAME"], " ", "_")
-    return fmt.Sprintf("contract_%s_%d.docx", strings.ToLower(clientName), index)
-}
-
-// Creates: contract_john_smith_1.docx, contract_john_doe_2.docx
-err := docx.ProcessDocxMultipleRecordsWithNames("contract_template.docx", "./contracts", records, nameFunc)
-```
-
-### Parameters:
-
--   `inputPath` (string): Path to the source DOCX template file
--   `outputPath` (string): Path where the final DOCX file with all replacements will be saved
--   `record` ([]map[string]string): Dynamically sliced map where keys are keywords to find and values are replacement text
--   `nameFunc` func(map[string]string, int): Custom function to customize the naming of the output files
-
-### Use Cases:
-
--   Creating multiple fully populated documents from a single template
--   Document generating for multiple records simultaneously
--   The use case calls for a custom naming convention instead of the simple Printf-style naming provided by ProcessDocxMultipleRecords
-
-### Example Scenario:
-
-```go
-multipleInvoiceData := []map[string]string{
-    {
-        "INVOICE_NUMBER":     "INV-2024-001",
-        "INVOICE_DATE":       "2024-07-16",
-        "CLIENT_NAME":        "ABC Corporation",
-        "CLIENT_ADDRESS":     "456 Business Ave, Suite 100",
-        "TOTAL_AMOUNT":       "$2,500.00",
-        "DUE_DATE":           "2024-08-16",
-        "DESCRIPTION":        "Web Development Services",
-    },
-    {
-        "INVOICE_NUMBER":     "INV-2024-002",
-        "INVOICE_DATE":       "2024-07-23",
-        "CLIENT_NAME":        "DEF Corporation",
-        "CLIENT_ADDRESS":     "456 Business Ave, Suite 112",
-        "TOTAL_AMOUNT":       "$1,230.00",
-        "DUE_DATE":           "2024-09-01",
-        "DESCRIPTION":        "Web Development Services",
-    }
-}
-
-invoiceNamingFunction := func(map[string]string, index int) string {
-    return record["INVOICE_NUMBER"] + ".docx"
+    return record["{{INVOICE_NUMBER}}"] + ".docx"
 }
 
 // Creates: INV-2024-001.docx, INV-2024-002.docx
-docx.ProcessDocxMultipleRecordsWithNames("invoice_template.docx", "./invoices", multipleInvoiceData, invoiceNamingFunction)
+err := docx.ProcessDocxMultipleRecordsWithNames(
+    "invoice_template.docx",
+    "./invoices",
+    records,
+    nameFunc,
+)
 ```
 
-## Advanced Usage
+**Use Cases:**
+- Custom file naming conventions
+- Date-based organization
+- Client-specific naming
+- Complex naming logic
 
-### Error Handling:
+## 🎯 Use Cases
+
+| Use Case | Recommended Function | CLI Command |
+|----------|---------------------|-------------|
+| Single personalized letter | `ProcessDocxSingle` | `single` |
+| Complete contract | `ProcessDocxMulti` | `multi` |
+| 100 employee certificates | `ProcessDocxMultipleRecords` | `batch` |
+| Invoices with custom IDs | `ProcessDocxMultipleRecordsWithNames` | `batch` with pattern |
+| Monthly reports | `ProcessDocxMulti` | `multi` |
+| Mail merge | `ProcessDocxMultipleRecords` | `batch` |
+
+## 🔧 Integration Examples
+
+### Python
+
+```python
+import subprocess
+import json
+
+# Single replacement
+subprocess.run([
+    "officeforge", "single",
+    "--input", "template.docx",
+    "--output", "output.docx",
+    "--key", "{{NAME}}",
+    "--value", "John Doe"
+])
+
+# Multiple replacements
+data = {
+    "{{NAME}}": "John Doe",
+    "{{EMAIL}}": "john@example.com"
+}
+with open("data.json", "w") as f:
+    json.dump(data, f)
+
+subprocess.run([
+    "officeforge", "multi",
+    "--input", "template.docx",
+    "--output", "output.docx",
+    "--data", "data.json"
+])
+```
+
+### Node.js
+
+```javascript
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+// Single replacement
+execSync(`officeforge single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"`);
+
+// Multiple replacements
+const data = {
+  "{{NAME}}": "John Doe",
+  "{{EMAIL}}": "john@example.com"
+};
+fs.writeFileSync('data.json', JSON.stringify(data));
+execSync(`officeforge multi --input template.docx --output output.docx --data data.json`);
+```
+
+### PHP
+
+```php
+<?php
+// Single replacement
+shell_exec('officeforge single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"');
+
+// Multiple replacements
+$data = [
+    "{{NAME}}" => "John Doe",
+    "{{EMAIL}}" => "john@example.com"
+];
+file_put_contents('data.json', json_encode($data));
+shell_exec('officeforge multi --input template.docx --output output.docx --data data.json');
+?>
+```
+
+### Bash Script
+
+```bash
+#!/bin/bash
+
+# Batch process from CSV
+officeforge batch \
+  --input template.docx \
+  --output ./contracts \
+  --data employees.csv \
+  --pattern "{NAME}_contract.docx"
+
+# Check exit status
+if [ $? -eq 0 ]; then
+    echo "✓ Documents generated successfully"
+else
+    echo "✗ Error generating documents"
+    exit 1
+fi
+```
+
+## 💡 Best Practices
+
+### Keyword Formatting
+
+✅ **Good:**
+- `{{NAME}}` - Clear delimiters
+- `[[EMAIL]]` - Unique brackets
+- `__PHONE__` - Underscores
+
+❌ **Avoid:**
+- `NAME` - Could match regular text
+- `<NAME>` - Conflicts with XML
+- `{NAME}` - Single braces might appear naturally
+
+### Template Design
+
+1. **Use descriptive keywords**
+   ```
+   ✅ {{CLIENT_FULL_NAME}}
+   ❌ {{N}}
+   ```
+
+2. **Keep keywords visible**
+   - Use ALL CAPS or special formatting
+   - Makes templates easy to review
+
+3. **Test with sample data**
+   ```bash
+   officeforge single \
+     --input template.docx \
+     --output test.docx \
+     --key "{{TEST}}" \
+     --value "SAMPLE"
+   ```
+
+### Error Handling
 
 ```go
-err := docx.ProcessDocxSingle("input.docx", "output.docx", "KEYWORD", "replacement")
+// Check if template exists
+if _, err := os.Stat("template.docx"); os.IsNotExist(err) {
+    log.Fatal("Template file not found")
+}
+
+// Ensure output directory exists
+os.MkdirAll("./output", 0755)
+
+// Process with error handling
+err := docx.ProcessDocxMulti("template.docx", "output.docx", data)
 if err != nil {
     log.Printf("Processing failed: %v", err)
     // Handle error appropriately
 }
+```
 
-err = docx.ProcessDocxMulti("template.docx", "output.docx", replacements)
-if err != nil {
-    log.Printf("Batch processing failed: %v", err)
-    // Handle error appropriately
+## 🔍 Troubleshooting
+
+### Keywords not replaced
+
+**Cause:** Keyword spelling mismatch or formatting issues
+
+**Solution:**
+```bash
+# Check your template for exact keyword spelling
+# Ensure no extra spaces: "{{ NAME }}" vs "{{NAME}}"
+```
+
+### Output file not created
+
+**Cause:** Missing output directory or insufficient permissions
+
+**Solution:**
+```bash
+# Create output directory first
+mkdir -p ./output
+
+# Check permissions
+ls -la ./output
+```
+
+### "Template file not found"
+
+**Cause:** Incorrect file path
+
+**Solution:**
+```bash
+# Use absolute paths
+officeforge single --input /full/path/to/template.docx ...
+
+# Or relative paths from current directory
+officeforge single --input ./templates/template.docx ...
+```
+
+### Memory issues with large batches
+
+**Solution:** Process in smaller chunks
+```go
+// Instead of processing 10,000 records at once
+// Process in batches of 100
+for i := 0; i < len(allRecords); i += 100 {
+    batch := allRecords[i:min(i+100, len(allRecords))]
+    docx.ProcessDocxMultipleRecords(template, output, batch, pattern)
 }
 ```
 
-### Checking File Existence:
+## 🗺️ Roadmap
 
-```go
-if _, err := os.Stat("template.docx"); os.IsNotExist(err) {
-    log.Fatal("Template file does not exist")
-}
-```
+- [x] Word (DOCX) support
+- [x] CLI tool
+- [x] Batch processing
+- [ ] Excel (XLSX) support
+- [ ] PowerPoint (PPTX) support
+- [ ] Image insertion
+- [ ] Table manipulation
+- [ ] Conditional content
+- [ ] Package managers (Homebrew, Chocolatey, Scoop)
 
-### Creating Output Directories:
+## 🤝 Contributing
 
-```go
-outputPath := "./generated_documents/contract.docx"
-outputDir := filepath.Dir(outputPath)
-if err := os.MkdirAll(outputDir, 0755); err != nil {
-    log.Printf("Failed to create output directory: %v", err)
-}
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Best Practices
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### Keyword Formatting:
-
--   Use consistent keyword formatting (e.g., `{{KEYWORD}}`, `KEYWORD`, `[KEYWORD]`)
--   Choose keywords that won't accidentally match regular text
--   Consider using unique delimiters to avoid false matches
-
-### File Organization:
-
-```go
-// Organize by date
-outputPath := fmt.Sprintf("./documents/%s/contract.docx", time.Now().Format("2006-01-02"))
-
-// Organize by client
-outputPath := fmt.Sprintf("./clients/%s/contract.docx", clientName)
-```
-
-### Template Design:
-
--   Keep templates simple and well-formatted
--   Use clear, descriptive keyword names
--   Test templates with sample data before production use
--   Consider using placeholder text that's obviously a placeholder and is not meant to be present in the final document (e.g., "REPLACE_WITH_CLIENT_NAME")
-
-## Integration Examples
-
-## CLI Tool Integration
-
-```go
-package main
-
-import (
-    "flag"
-    "log"
-    "github.com/siliconcatalyst/officeforge/docx"
-)
-
-func main() {
-    var (
-        input       = flag.String("input", "", "Input DOCX file")
-        output      = flag.String("output", "", "Output DOCX file")
-        keyword     = flag.String("keyword", "", "Keyword to replace")
-        replacement = flag.String("replacement", "", "Replacement text")
-    )
-    flag.Parse()
-
-    err := docx.ProcessDocxSingle(*input, *output, *keyword, *replacement)
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-```
-
-### Usage Examples
+### Development Setup
 
 ```bash
-# Single replacement
-./cli-tool -input template.docx -output output.docx -keyword "{{NAME}}" -replacement "John Doe"
+# Clone the repository
+git clone https://github.com/siliconcatalyst/officeforge.git
+cd officeforge
 
-# Multiple replacements (build separate tool)
-./multi-tool -input template.docx -output output.docx -config replacements.json
+# Install dependencies
+go mod download
 
-# Batch processing (build separate tool)
-./batch-tool -input template.docx -output-dir ./outputs -records data.json
+# Run tests
+cd tests
+go test -v
+
+# Or use gotestsum for prettier output
+gotestsum --format testname
 ```
 
-### Multi-Replacement CLI Example
+## 📄 License
 
-```go
-package main
+MIT License - see [LICENSE](LICENSE) file for details
 
-import (
-    "encoding/json"
-    "flag"
-    "os"
-    "github.com/siliconcatalyst/officeforge/docx"
+## 🙏 Support
 
-)
+- 📖 [Documentation](https://github.com/siliconcatalyst/officeforge/wiki)
+- 🐛 [Issue Tracker](https://github.com/siliconcatalyst/officeforge/issues)
 
-func main() {
-    var (
-        input  = flag.String("input", "", "Input DOCX file")
-        output = flag.String("output", "", "Output DOCX file")
-        config = flag.String("config", "", "JSON config file")
-    )
-    flag.Parse()
+---
 
-    // Read replacements from JSON
-    data, _ := os.ReadFile(*config)
-    var replacements map[string]string
-    json.Unmarshal(data, &replacements)
+**Made with ❤️ by the OfficeForge team**
 
-    err := docx.ProcessDocxMulti(*input, *output, replacements)
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-```
-
-## Configuration Examples
-
-### Single Replacement Config
-
-```json
-{
-	"template": "invoice_template.docx",
-	"output": "invoice_001.docx",
-	"keyword": "{{INVOICE_ID}}",
-	"replacement": "INV-2025-001"
-}
-```
-
-### Multi Replacement Config
-
-```json
-{
-	"template": "contract_template.docx",
-	"output": "contract_acme.docx",
-	"replacements": {
-		"{{CLIENT_NAME}}": "Acme Corporation",
-		"{{DATE}}": "2025-07-16",
-		"{{AMOUNT}}": "$50,000",
-		"{{DURATION}}": "12 months",
-		"{{PROJECT}}": "Website Development"
-	}
-}
-```
-
-### Batch Processing Config
-
-```json
-{
-	"template": "certificate_template.docx",
-	"output_dir": "./certificates",
-	"file_name_pattern": "certificate_%s.docx",
-	"records": [
-		{
-			"{{NAME}}": "John Doe",
-			"{{EMAIL}}": "john@example.com",
-			"{{COURSE}}": "Advanced Go Programming",
-			"{{DATE}}": "2025-07-16"
-		},
-		{
-			"{{NAME}}": "Jane Smith",
-			"{{EMAIL}}": "jane@example.com",
-			"{{COURSE}}": "Advanced Go Programming",
-			"{{DATE}}": "2025-07-16"
-		}
-	]
-}
-```
-
-## Error Handling Best Practices
-
-### CLI Error Handling
-
-```bash
-# Robust error handling in bash
-process_with_retry() {
-    local max_attempts=3
-    local attempt=1
-
-    while [ $attempt -le $max_attempts ]; do
-        echo "Attempt $attempt of $max_attempts"
-
-        if ./docx-processor single --input "$1" --output "$2" --keyword "$3" --replacement "$4"; then
-            echo "Success on attempt $attempt"
-            return 0
-        else
-            echo "Attempt $attempt failed"
-            ((attempt++))
-            sleep 2
-        fi
-    done
-
-    echo "All attempts failed"
-    return 1
-}
-```
-
-## Common Issues and Solutions
-
-### Issue: Keywords not found
-
-**Solution**: Verify keyword spelling and formatting in the template document
-
-### Issue: Output files not created
-
-**Solution**: Check that the output directory exists and has write permissions
-
-### Issue: Malformed DOCX output
-
-**Solution**: Ensure the input file is a valid DOCX file and not corrupted
-
-### Issue: Partial replacements
-
-**Solution**: Check for keyword conflicts or overlapping text patterns
-
-### Issue: Memory usage with large files
-
-**Solution**: Process documents individually rather than in large batches
+If you find this project useful, please consider giving it a ⭐ on GitHub!

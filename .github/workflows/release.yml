@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags like v1.0.0, v1.2.3
+
+permissions:
+  contents: write  # Needed to create releases
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Build binaries
+        run: |
+          # Windows
+          GOOS=windows GOARCH=amd64 go build -o officeforge-windows-amd64.exe ./cmd/officeforge
+          GOOS=windows GOARCH=arm64 go build -o officeforge-windows-arm64.exe ./cmd/officeforge
+          
+          # Linux
+          GOOS=linux GOARCH=amd64 go build -o officeforge-linux-amd64 ./cmd/officeforge
+          GOOS=linux GOARCH=arm64 go build -o officeforge-linux-arm64 ./cmd/officeforge
+          
+          # macOS
+          GOOS=darwin GOARCH=amd64 go build -o officeforge-darwin-amd64 ./cmd/officeforge
+          GOOS=darwin GOARCH=arm64 go build -o officeforge-darwin-arm64 ./cmd/officeforge
+
+      - name: Generate checksums
+        run: |
+          sha256sum officeforge-* > checksums.txt
+          cat checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            officeforge-windows-amd64.exe
+            officeforge-windows-arm64.exe
+            officeforge-linux-amd64
+            officeforge-linux-arm64
+            officeforge-darwin-amd64
+            officeforge-darwin-arm64
+            checksums.txt
+          body: |
+            ## Installation
+            
+            Download the appropriate binary for your system and add it to your PATH.
+            
+            ### Via Go Install
+            ```bash
+            go install github.com/siliconcatalyst/officeforge/cmd/officeforge@${{ github.ref_name }}
+            ```
+            
+            ### Manual Installation
+            1. Download the binary for your OS/architecture
+            2. Extract and move to a directory in your PATH
+            3. Make it executable (Linux/Mac): `chmod +x officeforge-*`
+            
+            ### Verify Installation
+            ```bash
+            officeforge version
+            ```
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
