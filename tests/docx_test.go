@@ -49,7 +49,9 @@ func TestProcessDocxSingle(t *testing.T) {
 	outputPath := "testdata/output/single_output.docx"
 
 	// Ensure output directory exists
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	// Check template exists
@@ -84,14 +86,16 @@ func TestProcessDocxSingle(t *testing.T) {
 		t.Errorf("Placeholder {{NAME}} still present in output")
 	}
 
-	t.Logf("✓ Single replacement test passed")
+	t.Logf("\033[32m✓ Single replacement test passed\033[0m")
 }
 
 func TestProcessDocxSingleMissingKeyword(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputPath := "testdata/output/single_missing.docx"
 
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	// Test with keyword that doesn't exist in template
@@ -105,13 +109,15 @@ func TestProcessDocxSingleMissingKeyword(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	t.Logf("✓ Missing keyword handled gracefully")
+	t.Logf("\033[33m⚠ Missing keyword handled gracefully\033[0m")
 }
 
 func TestProcessDocxSingleInvalidTemplate(t *testing.T) {
 	outputPath := "testdata/output/invalid_output.docx"
 
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	// Test with non-existent template
@@ -120,14 +126,16 @@ func TestProcessDocxSingleInvalidTemplate(t *testing.T) {
 		t.Fatalf("Expected error for non-existent template, got nil")
 	}
 
-	t.Logf("✓ Invalid template error handled: %v", err)
+	t.Logf("\033[36m✓ Invalid template error handled: %v\033[0m", err)
 }
 
 func TestProcessDocxMulti(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputPath := "testdata/output/multi_output.docx"
 
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	if !fileExists(templatePath) {
@@ -175,14 +183,16 @@ func TestProcessDocxMulti(t *testing.T) {
 		}
 	}
 
-	t.Logf("✓ Multiple replacements test passed")
+	t.Logf("\033[32m✓ Multiple replacements test passed\033[0m")
 }
 
 func TestProcessDocxMultiEmptyReplacements(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputPath := "testdata/output/multi_empty.docx"
 
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	// Test with empty replacements map
@@ -195,14 +205,16 @@ func TestProcessDocxMultiEmptyReplacements(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	t.Logf("✓ Empty replacements handled gracefully")
+	t.Logf("\033[32m✓ Empty replacements handled gracefully\033[0m")
 }
 
 func TestProcessDocxMultipleRecords(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputDir := "testdata/output/batch"
 
-	os.MkdirAll(outputDir, 0755)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	if !fileExists(templatePath) {
@@ -257,14 +269,16 @@ func TestProcessDocxMultipleRecords(t *testing.T) {
 		t.Errorf("First record data not found in output")
 	}
 
-	t.Logf("✓ Batch processing with pattern test passed")
+	t.Logf("\033[32m✓ Batch processing with pattern test passed\033[0m")
 }
 
 func TestProcessDocxMultipleRecordsDefaultNaming(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputDir := "testdata/output/batch_default"
 
-	os.MkdirAll(outputDir, 0755)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	records := []map[string]string{
@@ -287,14 +301,16 @@ func TestProcessDocxMultipleRecordsDefaultNaming(t *testing.T) {
 		}
 	}
 
-	t.Logf("✓ Batch processing with default naming test passed")
+	t.Logf("\033[32m✓ Batch processing with default naming test passed\033[0m")
 }
 
 func TestProcessDocxMultipleRecordsWithNames(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputDir := "testdata/output/batch_custom"
 
-	os.MkdirAll(outputDir, 0755)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	records := []map[string]string{
@@ -329,14 +345,16 @@ func TestProcessDocxMultipleRecordsWithNames(t *testing.T) {
 		}
 	}
 
-	t.Logf("✓ Batch processing with custom naming test passed")
+	t.Logf("\033[32m✓ Batch processing with custom naming test passed\033[0m")
 }
 
 func TestProcessDocxMultipleRecordsEmptyRecords(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputDir := "testdata/output/batch_empty"
 
-	os.MkdirAll(outputDir, 0755)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	// Test with empty records slice
@@ -351,14 +369,16 @@ func TestProcessDocxMultipleRecordsEmptyRecords(t *testing.T) {
 		t.Errorf("Expected no files, but found %d", len(files))
 	}
 
-	t.Logf("✓ Empty records handled gracefully")
+	t.Logf("\033[32m✓ Empty records handled gracefully\033[0m")
 }
 
 func TestProcessDocxSpecialCharacters(t *testing.T) {
 	templatePath := "testdata/template.docx"
 	outputPath := "testdata/output/special_chars.docx"
 
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		t.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	// Test with special characters in replacement
@@ -388,25 +408,31 @@ func TestProcessDocxSpecialCharacters(t *testing.T) {
 		t.Logf("Warning: Special characters may not be preserved exactly")
 	}
 
-	t.Logf("✓ Special characters test passed")
+	t.Logf("\033[32m✓ Special characters test passed\033[0m")
 }
 
 // Benchmark tests
 func BenchmarkProcessDocxSingle(b *testing.B) {
 	templatePath := "testdata/template.docx"
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		b.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		outputPath := fmt.Sprintf("testdata/output/bench_%d.docx", i)
-		docx.ProcessDocxSingle(templatePath, outputPath, "{{NAME}}", "Benchmark User")
+		if err := docx.ProcessDocxSingle(templatePath, outputPath, "{{NAME}}", "Benchmark User"); err != nil {
+			b.Fatalf("Benchmark failed: %v", err)
+		}
 	}
 }
 
 func BenchmarkProcessDocxMulti(b *testing.B) {
 	templatePath := "testdata/template.docx"
-	os.MkdirAll("testdata/output", 0755)
+	if err := os.MkdirAll("testdata/output", 0755); err != nil {
+		b.Fatalf("Failed to create output directory: %v", err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	replacements := map[string]string{
@@ -420,6 +446,8 @@ func BenchmarkProcessDocxMulti(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		outputPath := fmt.Sprintf("testdata/output/bench_multi_%d.docx", i)
-		docx.ProcessDocxMulti(templatePath, outputPath, replacements)
+		if err := docx.ProcessDocxMulti(templatePath, outputPath, replacements); err != nil {
+			b.Fatalf("Benchmark failed: %v", err)
+		}
 	}
 }
