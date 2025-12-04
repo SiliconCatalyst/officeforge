@@ -1,0 +1,9 @@
+CLIENT_NAME,CLIENT_EMAIL,CLIENT_PHONE,CLIENT_COMPANY,CONTRACT_DATE,CONTRACT_AMOUNT,PROJECT_NAME,PROJECT_DEADLINE,PAYMENT_TERMS
+Isabella Garcia,isabella@healthtech.com,555-0301,HealthTech Innovations,December 04 2024,$15000,Patient Portal Development,February 28 2025,50% upfront 50% on delivery
+James Anderson,james@eduplatform.com,555-0302,EduPlatform Inc,December 04 2024,$22000,Learning Management System,April 15 2025,Monthly billing
+Karen Brown,karen@logistics.com,555-0303,Logistics Solutions LLC,December 04 2024,$30000,Fleet Management System,May 31 2025,Milestone-based payments
+Lucas Taylor,lucas@realestate.com,555-0304,RealEstate Partners,December 04 2024,$17500,Property Management Portal,March 10 2025,Net 30 days
+Maya Patel,maya@greentech.com,555-0305,GreenTech Ventures,December 04 2024,$25000,Sustainability Dashboard,June 15 2025,Quarterly installments
+Nathan Rodriguez,nathan@mediahouse.com,555-0306,MediaHouse Productions,December 04 2024,$19000,Content Management System,March 25 2025,50% upfront 50% completion
+Olivia Kim,olivia@fashionbrand.com,555-0307,Fashion Brand Studio,December 04 2024,$13500,E-commerce Integration,February 20 2025,Net 45 days
+Peter Johnson,peter@manufacturing.com,555-0308,Manufacturing Pro,December 04 2024,$32000,Production Tracking System,May 20 2025,Monthly payments
