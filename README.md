@@ -77,25 +77,27 @@ go get github.com/siliconcatalyst/officeforge@latest
 
 ```bash
 # Single keyword replacement
-officeforge docx-single \
+officeforge-windows-amd64.exe docx-single \
   --input template.docx \
   --output contract.docx \
   --key "{{NAME}}" \
   --value "John Doe"
 
 # Multiple replacements from JSON
-officeforge docx-multi \
+officeforge-windows-amd64.exe docx-multi \
   --input template.docx \
   --output contract.docx \
   --data replacements.json
 
 # Batch generation from CSV
-officeforge docx-batch \
+officeforge-windows-amd64.exe docx-batch \
   --input template.docx \
   --output ./contracts \
   --data employees.csv \
   --pattern "{NAME}_contract.docx"
 ```
+
+> (Note: If you are on Windows, and the input, output or data files contain spaces in their name, you must use Quotation marks in the command, example: `officeforge-windows-amd64.exe docx-multi --input "Proforma Invoice.docx" --output "Decembers' Invoice.docx" --data "Remaining Inventory.csv"`)
 
 ### Library Usage
 
@@ -131,7 +133,7 @@ docx.ProcessDocxMulti("template.docx", "output.docx", replacements)
 Replace one keyword in a template document.
 
 ```bash
-officeforge docx-single \
+officeforge-windows-amd64.exe docx-single \
   --input template.docx \
   --output result.docx \
   --key "{{CLIENT}}" \
@@ -164,7 +166,7 @@ Replace multiple keywords using a JSON configuration file.
 **Run command:**
 
 ```bash
-officeforge docx-multi \
+officeforge-windows-amd64.exe docx-multi \
   --input template.docx \
   --output completed_form.docx \
   --data data.json
@@ -192,7 +194,7 @@ Bob Johnson,bob@company.com,555-9999,Designer,2024-03-10
 **Run command:**
 
 ```bash
-officeforge docx-batch \
+officeforge-windows-amd64.exe docx-batch \
   --input contract_template.docx \
   --output ./contracts \
   --data employees.csv \
@@ -217,7 +219,7 @@ officeforge docx-batch \
 ```
 
 ```bash
-officeforge docx-batch \
+officeforge-windows-amd64.exe docx-batch \
   --input template.docx \
   --output ./output \
   --data records.json
@@ -419,7 +421,7 @@ import json
 
 # Single replacement
 subprocess.run([
-    "officeforge", "single",
+    "officeforge-windows-amd64.exe", "single",
     "--input", "template.docx",
     "--output", "output.docx",
     "--key", "{{NAME}}",
@@ -435,7 +437,7 @@ with open("data.json", "w") as f:
     json.dump(data, f)
 
 subprocess.run([
-    "officeforge", "docx-multi",
+    "officeforge-windows-amd64.exe", "docx-multi",
     "--input", "template.docx",
     "--output", "output.docx",
     "--data", "data.json"
@@ -450,7 +452,7 @@ const fs = require("fs");
 
 // Single replacement
 execSync(
-	`officeforge docx-single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"`,
+	`officeforge-windows-amd64.exe docx-single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"`,
 );
 
 // Multiple replacements
@@ -460,7 +462,7 @@ const data = {
 };
 fs.writeFileSync("data.json", JSON.stringify(data));
 execSync(
-	`officeforge docx-multi --input template.docx --output output.docx --data data.json`,
+	`officeforge-windows-amd64.exe docx-multi --input template.docx --output output.docx --data data.json`,
 );
 ```
 
@@ -469,7 +471,7 @@ execSync(
 ```php
 <?php
 // Single replacement
-shell_exec('officeforge docx-single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"');
+shell_exec('officeforge-windows-amd64.exe docx-single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"');
 
 // Multiple replacements
 $data = [
@@ -477,7 +479,7 @@ $data = [
     "{{EMAIL}}" => "john@example.com"
 ];
 file_put_contents('data.json', json_encode($data));
-shell_exec('officeforge docx-multi --input template.docx --output output.docx --data data.json');
+shell_exec('officeforge-windows-amd54.exe docx-multi --input template.docx --output output.docx --data data.json');
 ?>
 ```
 
@@ -487,7 +489,7 @@ shell_exec('officeforge docx-multi --input template.docx --output output.docx --
 #!/bin/bash
 
 # Batch process from CSV
-officeforge docx-batch \
+officeforge-windows-amd64.exe docx-batch \
   --input template.docx \
   --output ./contracts \
   --data employees.csv \
@@ -533,7 +535,7 @@ fi
 
 3. **Test with sample data**
     ```bash
-    officeforge docx-single \
+    officeforge-windows-amd64.exe docx-single \
       --input template.docx \
       --output test.docx \
       --key "{{TEST}}" \
@@ -594,10 +596,10 @@ ls -la ./output
 
 ```bash
 # Use absolute paths
-officeforge docx-single --input /full/path/to/template.docx ...
+officeforge-windows-amd64.exe docx-single --input /full/path/to/template.docx ...
 
 # Or relative paths from current directory
-officeforge docx-single --input ./templates/template.docx ...
+officeforge-windows-amd64.exe docx-single --input ./templates/template.docx ...
 ```
 
 ### Memory issues with large batches
