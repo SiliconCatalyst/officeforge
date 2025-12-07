@@ -20,12 +20,12 @@ func main() {
 	command := os.Args[1]
 
 	switch command {
-	case "single":
-		handleSingle(os.Args[2:])
-	case "multi":
-		handleMulti(os.Args[2:])
-	case "batch":
-		handleBatch(os.Args[2:])
+	case "docx-single":
+		handleDocxSingle(os.Args[2:])
+	case "docx-multi":
+		handleDocxMulti(os.Args[2:])
+	case "docx-batch":
+		handleDocxBatch(os.Args[2:])
 	case "version":
 		fmt.Println("OfficeForge v1.0.0")
 	case "help", "-h", "--help":
@@ -44,29 +44,29 @@ Usage:
   officeforge <command> [options]
 
 Commands:
-  single      Replace a single keyword in a template
-  multi       Replace multiple keywords in a template
-  batch       Generate multiple documents from a template
+  docx-single      Replace a single keyword in a template
+  docx-multi       Replace multiple keywords in a template
+  docx-batch       Generate multiple documents from a template
   version     Show version
   help        Show this help message
 
 Examples:
   # Replace single keyword
-  officeforge single --input template.docx --output result.docx --key "{{NAME}}" --value "John Doe"
+  officeforge docx-single --input template.docx --output result.docx --key "{{NAME}}" --value "John Doe"
 
   # Replace multiple keywords from JSON
-  officeforge multi --input template.docx --output result.docx --data replacements.json
+  officeforge docx-multi --input template.docx --output result.docx --data replacements.json
 
   # Generate multiple documents from CSV
-  officeforge batch --input template.docx --output ./output --data records.csv
+  officeforge docx-batch --input template.docx --output ./output --data records.csv
 
   # Generate multiple documents with custom naming
-  officeforge batch --input template.docx --output ./output --data records.csv --pattern "{name}_{id}.docx"
+  officeforge docx-batch --input template.docx --output ./output --data records.csv --pattern "{name}_{id}.docx"
 
 For more information, visit: https://github.com/siliconcatalyst/officeforge`)
 }
 
-func handleSingle(args []string) {
+func handleDocxSingle(args []string) {
 	if len(args) < 8 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("\nUsage:")
@@ -115,7 +115,7 @@ func handleSingle(args []string) {
 	fmt.Printf("✓ Document created: %s\n", outputPath)
 }
 
-func handleMulti(args []string) {
+func handleDocxMulti(args []string) {
 	if len(args) < 6 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("\nUsage:")
@@ -174,7 +174,7 @@ func handleMulti(args []string) {
 	fmt.Printf("  Replaced %d keywords\n", len(replacements))
 }
 
-func handleBatch(args []string) {
+func handleDocxBatch(args []string) {
 	if len(args) < 6 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("\nUsage:")
