@@ -38,27 +38,6 @@
 
 Download the latest binary for your platform from the [Releases page](https://github.com/siliconcatalyst/officeforge/releases):
 
-```bash
-# macOS (Apple Silicon)
-curl -L https://github.com/siliconcatalyst/officeforge/releases/latest/download/officeforge-darwin-arm64 -o officeforge
-chmod +x officeforge
-sudo mv officeforge /usr/local/bin/
-
-# macOS (Intel)
-curl -L https://github.com/siliconcatalyst/officeforge/releases/latest/download/officeforge-darwin-amd64 -o officeforge
-chmod +x officeforge
-sudo mv officeforge /usr/local/bin/
-
-# Linux
-curl -L https://github.com/siliconcatalyst/officeforge/releases/latest/download/officeforge-linux-amd64 -o officeforge
-chmod +x officeforge
-sudo mv officeforge /usr/local/bin/
-
-# Windows (PowerShell)
-# Download officeforge-windows-amd64.exe from releases
-# Add to PATH or run directly
-```
-
 **Option 2: Install via Go**
 
 ```bash
@@ -97,7 +76,7 @@ officeforge-windows-amd64.exe docx-batch \
   --pattern "{NAME}_contract.docx"
 ```
 
-> (Note: If you are on Windows, and the input, output or data files contain spaces in their name, you must use Quotation marks in the command, example: `officeforge-windows-amd64.exe docx-multi --input "Proforma Invoice.docx" --output "Decembers' Invoice.docx" --data "Remaining Inventory.csv"`)
+> (Note: If you are on Windows, and the input, output or data files contain spaces in their name, you must use Quotation marks in the command, example: `.\officeforge-windows-amd64.exe docx-multi --input "Proforma Invoice.docx" --output "Decembers' Invoice.docx" --data "Remaining Inventory.csv"`)
 
 ### Library Usage
 
