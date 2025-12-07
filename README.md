@@ -77,20 +77,20 @@ go get github.com/siliconcatalyst/officeforge@latest
 
 ```bash
 # Single keyword replacement
-officeforge single \
+officeforge docx-single \
   --input template.docx \
   --output contract.docx \
   --key "{{NAME}}" \
   --value "John Doe"
 
 # Multiple replacements from JSON
-officeforge multi \
+officeforge docx-multi \
   --input template.docx \
   --output contract.docx \
   --data replacements.json
 
 # Batch generation from CSV
-officeforge batch \
+officeforge docx-batch \
   --input template.docx \
   --output ./contracts \
   --data employees.csv \
@@ -118,20 +118,20 @@ docx.ProcessDocxMulti("template.docx", "output.docx", replacements)
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `single` | Replace a single keyword in a template |
-| `multi` | Replace multiple keywords from a JSON file |
-| `batch` | Generate multiple documents from CSV/JSON data |
-| `version` | Display version information |
-| `help` | Show help message |
+| Command       | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `docx-single` | Replace a single keyword in a template         |
+| `docx-multi`  | Replace multiple keywords from a JSON file     |
+| `docx-batch`  | Generate multiple documents from CSV/JSON data |
+| `version`     | Display version information                    |
+| `help`        | Show help message                              |
 
 ### Single Replacement
 
 Replace one keyword in a template document.
 
 ```bash
-officeforge single \
+officeforge docx-single \
   --input template.docx \
   --output result.docx \
   --key "{{CLIENT}}" \
@@ -139,6 +139,7 @@ officeforge single \
 ```
 
 **Flags:**
+
 - `--input, -i`: Path to template DOCX file (required)
 - `--output, -o`: Path for output file (required)
 - `--key, -k`: Keyword to replace (required)
@@ -149,25 +150,28 @@ officeforge single \
 Replace multiple keywords using a JSON configuration file.
 
 **Create `data.json`:**
+
 ```json
 {
-  "{{NAME}}": "John Doe",
-  "{{EMAIL}}": "john@example.com",
-  "{{PHONE}}": "555-1234",
-  "{{COMPANY}}": "Tech Solutions Inc.",
-  "{{DATE}}": "2024-12-04"
+	"{{NAME}}": "John Doe",
+	"{{EMAIL}}": "john@example.com",
+	"{{PHONE}}": "555-1234",
+	"{{COMPANY}}": "Tech Solutions Inc.",
+	"{{DATE}}": "2024-12-04"
 }
 ```
 
 **Run command:**
+
 ```bash
-officeforge multi \
+officeforge docx-multi \
   --input template.docx \
   --output completed_form.docx \
   --data data.json
 ```
 
 **Flags:**
+
 - `--input, -i`: Path to template DOCX file (required)
 - `--output, -o`: Path for output file (required)
 - `--data, -d`: Path to JSON file with replacements (required)
@@ -177,6 +181,7 @@ officeforge multi \
 Generate multiple documents from CSV or JSON data.
 
 **Create `employees.csv`:**
+
 ```csv
 NAME,EMAIL,PHONE,POSITION,START_DATE
 John Doe,john@company.com,555-1234,Engineer,2024-01-15
@@ -185,8 +190,9 @@ Bob Johnson,bob@company.com,555-9999,Designer,2024-03-10
 ```
 
 **Run command:**
+
 ```bash
-officeforge batch \
+officeforge docx-batch \
   --input contract_template.docx \
   --output ./contracts \
   --data employees.csv \
@@ -194,35 +200,38 @@ officeforge batch \
 ```
 
 **With JSON data (`records.json`):**
+
 ```json
 [
-  {
-    "{{NAME}}": "John Doe",
-    "{{EMAIL}}": "john@example.com",
-    "{{POSITION}}": "Software Engineer"
-  },
-  {
-    "{{NAME}}": "Jane Smith",
-    "{{EMAIL}}": "jane@example.com",
-    "{{POSITION}}": "Product Manager"
-  }
+	{
+		"{{NAME}}": "John Doe",
+		"{{EMAIL}}": "john@example.com",
+		"{{POSITION}}": "Software Engineer"
+	},
+	{
+		"{{NAME}}": "Jane Smith",
+		"{{EMAIL}}": "jane@example.com",
+		"{{POSITION}}": "Product Manager"
+	}
 ]
 ```
 
 ```bash
-officeforge batch \
+officeforge docx-batch \
   --input template.docx \
   --output ./output \
   --data records.json
 ```
 
 **Flags:**
+
 - `--input, -i`: Path to template DOCX file (required)
 - `--output, -o`: Output directory path (required)
 - `--data, -d`: Path to CSV or JSON file (required)
 - `--pattern, -p`: File naming pattern (optional, defaults to `document_N.docx`)
 
 **Pattern Examples:**
+
 - `{NAME}_contract.docx` → `John_Doe_contract.docx`
 - `{EMAIL}_{DATE}.docx` → `john@example.com_2024-12-04.docx`
 - `invoice_{ID}.docx` → `invoice_001.docx`
@@ -244,6 +253,7 @@ func ProcessDocxSingle(inputPath, outputPath, keyword, replacement string) error
 ```
 
 **Example:**
+
 ```go
 err := docx.ProcessDocxSingle(
     "contract_template.docx",
@@ -257,6 +267,7 @@ if err != nil {
 ```
 
 **Use Cases:**
+
 - Quick personalization of documents
 - Testing individual replacements
 - Simple one-off document generation
@@ -270,6 +281,7 @@ func ProcessDocxMulti(inputPath, outputPath string, replacements map[string]stri
 ```
 
 **Example:**
+
 ```go
 contractData := map[string]string{
     "{{CLIENT_NAME}}":     "John Smith",
@@ -288,6 +300,7 @@ err := docx.ProcessDocxMulti(
 ```
 
 **Use Cases:**
+
 - Mail merge operations
 - Form filling
 - Complete document population
@@ -306,6 +319,7 @@ func ProcessDocxMultipleRecords(
 ```
 
 **Example:**
+
 ```go
 records := []map[string]string{
     {
@@ -330,6 +344,7 @@ err := docx.ProcessDocxMultipleRecords(
 ```
 
 **Use Cases:**
+
 - Bulk document generation
 - Certificate creation
 - Invoice generation
@@ -348,6 +363,7 @@ func ProcessDocxMultipleRecordsWithNames(
 ```
 
 **Example:**
+
 ```go
 records := []map[string]string{
     {
@@ -376,6 +392,7 @@ err := docx.ProcessDocxMultipleRecordsWithNames(
 ```
 
 **Use Cases:**
+
 - Custom file naming conventions
 - Date-based organization
 - Client-specific naming
@@ -383,14 +400,14 @@ err := docx.ProcessDocxMultipleRecordsWithNames(
 
 ## 🎯 Use Cases
 
-| Use Case | Recommended Function | CLI Command |
-|----------|---------------------|-------------|
-| Single personalized letter | `ProcessDocxSingle` | `single` |
-| Complete contract | `ProcessDocxMulti` | `multi` |
-| 100 employee certificates | `ProcessDocxMultipleRecords` | `batch` |
-| Invoices with custom IDs | `ProcessDocxMultipleRecordsWithNames` | `batch` with pattern |
-| Monthly reports | `ProcessDocxMulti` | `multi` |
-| Mail merge | `ProcessDocxMultipleRecords` | `batch` |
+| Use Case                   | Recommended Function                  | CLI Command               |
+| -------------------------- | ------------------------------------- | ------------------------- |
+| Single personalized letter | `ProcessDocxSingle`                   | `docx-single`             |
+| Complete contract          | `ProcessDocxMulti`                    | `docx-multi`              |
+| 100 employee certificates  | `ProcessDocxMultipleRecords`          | `docx-batch`              |
+| Invoices with custom IDs   | `ProcessDocxMultipleRecordsWithNames` | `docx-batch` with pattern |
+| Monthly reports            | `ProcessDocxMulti`                    | `docx-multi`              |
+| Mail merge                 | `ProcessDocxMultipleRecords`          | `docx-batch`              |
 
 ## 🔧 Integration Examples
 
@@ -418,7 +435,7 @@ with open("data.json", "w") as f:
     json.dump(data, f)
 
 subprocess.run([
-    "officeforge", "multi",
+    "officeforge", "docx-multi",
     "--input", "template.docx",
     "--output", "output.docx",
     "--data", "data.json"
@@ -428,19 +445,23 @@ subprocess.run([
 ### Node.js
 
 ```javascript
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require("child_process");
+const fs = require("fs");
 
 // Single replacement
-execSync(`officeforge single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"`);
+execSync(
+	`officeforge docx-single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"`,
+);
 
 // Multiple replacements
 const data = {
-  "{{NAME}}": "John Doe",
-  "{{EMAIL}}": "john@example.com"
+	"{{NAME}}": "John Doe",
+	"{{EMAIL}}": "john@example.com",
 };
-fs.writeFileSync('data.json', JSON.stringify(data));
-execSync(`officeforge multi --input template.docx --output output.docx --data data.json`);
+fs.writeFileSync("data.json", JSON.stringify(data));
+execSync(
+	`officeforge docx-multi --input template.docx --output output.docx --data data.json`,
+);
 ```
 
 ### PHP
@@ -448,7 +469,7 @@ execSync(`officeforge multi --input template.docx --output output.docx --data da
 ```php
 <?php
 // Single replacement
-shell_exec('officeforge single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"');
+shell_exec('officeforge docx-single --input template.docx --output output.docx --key "{{NAME}}" --value "John Doe"');
 
 // Multiple replacements
 $data = [
@@ -456,7 +477,7 @@ $data = [
     "{{EMAIL}}" => "john@example.com"
 ];
 file_put_contents('data.json', json_encode($data));
-shell_exec('officeforge multi --input template.docx --output output.docx --data data.json');
+shell_exec('officeforge docx-multi --input template.docx --output output.docx --data data.json');
 ?>
 ```
 
@@ -466,7 +487,7 @@ shell_exec('officeforge multi --input template.docx --output output.docx --data 
 #!/bin/bash
 
 # Batch process from CSV
-officeforge batch \
+officeforge docx-batch \
   --input template.docx \
   --output ./contracts \
   --data employees.csv \
@@ -486,11 +507,13 @@ fi
 ### Keyword Formatting
 
 ✅ **Good:**
+
 - `{{NAME}}` - Clear delimiters
 - `[[EMAIL]]` - Unique brackets
 - `__PHONE__` - Underscores
 
 ❌ **Avoid:**
+
 - `NAME` - Could match regular text
 - `<NAME>` - Conflicts with XML
 - `{NAME}` - Single braces might appear naturally
@@ -498,23 +521,24 @@ fi
 ### Template Design
 
 1. **Use descriptive keywords**
-   ```
-   ✅ {{CLIENT_FULL_NAME}}
-   ❌ {{N}}
-   ```
+
+    ```
+    ✅ {{CLIENT_FULL_NAME}}
+    ❌ {{N}}
+    ```
 
 2. **Keep keywords visible**
-   - Use ALL CAPS or special formatting
-   - Makes templates easy to review
+    - Use ALL CAPS or special formatting
+    - Makes templates easy to review
 
 3. **Test with sample data**
-   ```bash
-   officeforge single \
-     --input template.docx \
-     --output test.docx \
-     --key "{{TEST}}" \
-     --value "SAMPLE"
-   ```
+    ```bash
+    officeforge docx-single \
+      --input template.docx \
+      --output test.docx \
+      --key "{{TEST}}" \
+      --value "SAMPLE"
+    ```
 
 ### Error Handling
 
@@ -542,6 +566,7 @@ if err != nil {
 **Cause:** Keyword spelling mismatch or formatting issues
 
 **Solution:**
+
 ```bash
 # Check your template for exact keyword spelling
 # Ensure no extra spaces: "{{ NAME }}" vs "{{NAME}}"
@@ -552,6 +577,7 @@ if err != nil {
 **Cause:** Missing output directory or insufficient permissions
 
 **Solution:**
+
 ```bash
 # Create output directory first
 mkdir -p ./output
@@ -565,17 +591,19 @@ ls -la ./output
 **Cause:** Incorrect file path
 
 **Solution:**
+
 ```bash
 # Use absolute paths
-officeforge single --input /full/path/to/template.docx ...
+officeforge docx-single --input /full/path/to/template.docx ...
 
 # Or relative paths from current directory
-officeforge single --input ./templates/template.docx ...
+officeforge docx-single --input ./templates/template.docx ...
 ```
 
 ### Memory issues with large batches
 
 **Solution:** Process in smaller chunks
+
 ```go
 // Instead of processing 10,000 records at once
 // Process in batches of 100
