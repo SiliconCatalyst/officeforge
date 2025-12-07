@@ -620,11 +620,10 @@ for i := 0; i < len(allRecords); i += 100 {
 - [x] Word (DOCX) support
 - [x] CLI tool
 - [x] Batch processing
+- [x] Table manipulation
 - [ ] Excel (XLSX) support
 - [ ] PowerPoint (PPTX) support
 - [ ] Image insertion
-- [ ] Table manipulation
-- [ ] Conditional content
 - [ ] Package managers (Homebrew, Chocolatey, Scoop)
 
 ## 🤝 Contributing
@@ -665,7 +664,5 @@ MIT License - see [LICENSE](LICENSE) file for details
 - 🐛 [Issue Tracker](https://github.com/siliconcatalyst/officeforge/issues)
 
 ---
-
-**Made with ❤️ by the OfficeForge team**
 
 If you find this project useful, please consider giving it a ⭐ on GitHub!
