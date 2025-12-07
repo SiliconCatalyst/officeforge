@@ -11,6 +11,8 @@ import (
 	"github.com/siliconcatalyst/officeforge/docx"
 )
 
+var Version = "v0.0.0"
+
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
@@ -27,7 +29,7 @@ func main() {
 	case "docx-batch":
 		handleDocxBatch(os.Args[2:])
 	case "version":
-		fmt.Println("OfficeForge v1.0.0")
+		fmt.Println("OfficeForge", Version)
 	case "help", "-h", "--help":
 		printUsage()
 	default:
