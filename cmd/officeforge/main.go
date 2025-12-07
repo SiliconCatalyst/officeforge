@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/siliconcatalyst/officeforge/docx"
+	"github.com/siliconcatalyst/officeforge/internal"
 )
 
 var Version = "v0.0.0"
@@ -62,7 +63,7 @@ Examples:
   # Generate multiple documents from CSV
   officeforge docx-batch --input template.docx --output ./output --data records.csv
 
-  # Generate multiple documents with custom naming
+  # Generate multiple documents with custom internal
   officeforge docx-batch --input template.docx --output ./output --data records.csv --pattern "{name}_{id}.docx"
 
 For more information, visit: https://github.com/siliconcatalyst/officeforge`)
@@ -180,7 +181,12 @@ func handleDocxBatch(args []string) {
 	if len(args) < 6 {
 		fmt.Println("Error: Missing required arguments")
 		fmt.Println("\nUsage:")
-		fmt.Println("  officeforge batch --input <template> --output <directory> --data <csv_or_json_file> [--pattern <pattern>]")
+		fmt.Println("  officeforge docx-batch --input <template> --output <directory> --data <csv_or_json_file> [--pattern <pattern>]")
+		fmt.Println("\nPattern examples:")
+		fmt.Printf("  --pattern \"contract_%%d.docx\"           Sequential: contract_1.docx, contract_2.docx\n")
+		fmt.Println("  --pattern \"{NAME}_contract.docx\"      From data: Alice_contract.docx, Bob_contract.docx")
+		fmt.Println("  --pattern \"{ID}_{COMPANY}.docx\"       Multiple fields: 001_Acme.docx, 002_TechCorp.docx")
+		fmt.Println("  --pattern \"{NAME}_{INDEX}.docx\"       Combine data and index: Alice_1.docx, Bob_2.docx")
 		os.Exit(1)
 	}
 
@@ -247,16 +253,26 @@ func handleDocxBatch(args []string) {
 		os.Exit(1)
 	}
 
-	// Process with or without pattern
+	// Validate pattern if provided
 	if pattern != "" {
-		err = docx.ProcessDocxMultipleRecords(inputPath, outputDir, records, pattern)
-	} else {
-		// Use default naming function
-		err = docx.ProcessDocxMultipleRecordsWithNames(inputPath, outputDir, records, func(record map[string]string, index int) string {
-			return fmt.Sprintf("document_%d.docx", index+1)
-		})
+		if err := internal.ValidatePattern(pattern, records[0]); err != nil {
+			fmt.Printf("Error: Invalid pattern - %v\n", err)
+			os.Exit(1)
+		}
+
+		// Show what pattern type is being used
+		patternType := internal.DetectPatternType(pattern)
+		switch patternType {
+		case internal.PatternTypeSequential:
+			fmt.Printf("Using sequential pattern: %s\n", pattern)
+		case internal.PatternTypeData:
+			placeholders := internal.ExtractPlaceholders(pattern)
+			fmt.Printf("Using data-based pattern with fields: %v\n", placeholders)
+		}
 	}
 
+	// Process documents using the pattern
+	err = docx.ProcessDocxMultipleRecords(inputPath, outputDir, records, pattern)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)

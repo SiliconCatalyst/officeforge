@@ -69,21 +69,30 @@ func ProcessDocxMulti(inputPath, outputPath string, replacements map[string]stri
 	return nil
 }
 
+// ProcessDocxMultipleRecords generates multiple documents using a naming pattern
+// Pattern can be:
+//   - Sequential: "contract_%d.docx" (uses index)
+//   - Data-based: "{NAME}_contract.docx" (uses record fields)
+//   - Empty: defaults to "document_%d.docx"
 func ProcessDocxMultipleRecords(inputPath, outputDir string, records []map[string]string, fileNamePattern string) error {
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %v", err)
 	}
 
-	for i, record := range records {
-		// Generate output filename
-		var outputPath string
-		if fileNamePattern != "" {
-			// Use pattern with record index
-			outputPath = filepath.Join(outputDir, fmt.Sprintf(fileNamePattern, i+1))
-		} else {
-			// Default naming pattern
-			outputPath = filepath.Join(outputDir, fmt.Sprintf("document_%d.docx", i+1))
+	// Validate pattern with first record
+	if len(records) > 0 && fileNamePattern != "" {
+		if err := internal.ValidatePattern(fileNamePattern, records[0]); err != nil {
+			return fmt.Errorf("invalid pattern: %v", err)
 		}
+	}
+
+	// Create naming function based on pattern
+	nameFunc := internal.CreateNamingFunction(fileNamePattern)
+
+	for i, record := range records {
+		// Generate filename using the naming function
+		fileName := nameFunc(record, i+1)
+		outputPath := filepath.Join(outputDir, fileName)
 
 		// Process the document with this record's replacements
 		err := ProcessDocxMulti(inputPath, outputPath, record)
@@ -99,6 +108,8 @@ func ProcessDocxMultipleRecords(inputPath, outputDir string, records []map[strin
 	return nil
 }
 
+// ProcessDocxMultipleRecordsWithNames generates multiple documents using a custom naming function
+// This provides maximum flexibility for complex naming logic
 func ProcessDocxMultipleRecordsWithNames(inputPath, outputDir string, records []map[string]string, nameFunc func(map[string]string, int) string) error {
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %v", err)
