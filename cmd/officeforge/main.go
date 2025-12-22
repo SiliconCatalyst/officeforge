@@ -29,6 +29,8 @@ func main() {
 		handleDocxMulti(os.Args[2:])
 	case "docx-batch":
 		handleDocxBatch(os.Args[2:])
+	case "docx-check":
+		handleDocxCheck(os.Args[2:])
 	case "version":
 		fmt.Println("OfficeForge", Version)
 	case "help", "-h", "--help":
@@ -50,6 +52,7 @@ Commands:
   docx-single      Replace a single keyword in a template
   docx-multi       Replace multiple keywords in a template
   docx-batch       Generate multiple documents from a template
+  docx-check	   Check if keywords exist in a document
   version     Show version
   help        Show this help message
 
@@ -65,6 +68,12 @@ Examples:
 
   # Generate multiple documents with custom internal
   officeforge docx-batch --input template.docx --output ./output --data records.csv --pattern "{name}_{id}.docx"
+
+  # Check for specific keywords
+  officeforge docx-check --input doc.docx --keys "TOTAL_COST,DATE,SIGNATURE"
+  
+  # Check using a JSON file of keys
+  officeforge docx-check --input doc.docx --data keys.json
 
 For more information, visit: https://github.com/siliconcatalyst/officeforge`)
 }
@@ -279,6 +288,118 @@ func handleDocxBatch(args []string) {
 	}
 
 	fmt.Printf("✓ Generated %d documents in: %s\n", len(records), outputDir)
+}
+
+func handleDocxCheck(args []string) {
+	if len(args) < 4 {
+		fmt.Println("Error: Missing required arguments")
+		fmt.Println("\nUsage:")
+		fmt.Println("  officeforge docx-check --input <file> [--keys \"K1,K2\" | --data <json_file>] --json")
+		os.Exit(1)
+	}
+
+	var inputPath, keysString, dataPath string
+	var outputJson bool
+
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--input", "-i":
+			if i+1 < len(args) {
+				inputPath = args[i+1]
+				i++
+			}
+		case "--keys", "-k":
+			if i+1 < len(args) {
+				keysString = args[i+1]
+				i++
+			}
+		case "--data", "-d":
+			if i+1 < len(args) {
+				dataPath = args[i+1]
+				i++
+			}
+		case "--json":
+			outputJson = true
+		}
+	}
+
+	if inputPath == "" || (keysString == "" && dataPath == "") {
+		fmt.Println("Error: --input and either --keys or --data are required")
+		os.Exit(1)
+	}
+
+	var keywords []string
+
+	// Load keywords from JSON or Comma Separated String
+	if dataPath != "" {
+		data, err := os.ReadFile(dataPath)
+		if err != nil {
+			fmt.Printf("Error reading data file: %v\n", err)
+			os.Exit(1)
+		}
+		// Try parsing as array first, then as map keys
+		var keyList []string
+		if err := json.Unmarshal(data, &keyList); err == nil {
+			keywords = keyList
+		} else {
+			var keyMap map[string]interface{}
+			if err := json.Unmarshal(data, &keyMap); err == nil {
+				for k := range keyMap {
+					keywords = append(keywords, k)
+				}
+			}
+		}
+	} else {
+		keywords = strings.Split(keysString, ",")
+		for i := range keywords {
+			keywords[i] = strings.TrimSpace(keywords[i])
+		}
+	}
+
+	// Call the logic function (which you'll add to your docx package)
+	results, err := internal.ValidateKeywords(inputPath, keywords)
+	if err != nil {
+		// If there's a system error, we should still handle it
+		if outputJson {
+			fmt.Printf(`{"error": "%v"}`, err)
+		} else {
+			fmt.Printf("Error: %v\n", err)
+		}
+		os.Exit(1)
+	}
+
+	// Calculate foundCount for the summary
+	foundCount := 0
+	for _, found := range results {
+		if found {
+			foundCount++
+		}
+	}
+
+	// --- OUTPUT LOGIC ---
+	if outputJson {
+		// ONLY print JSON so the UI can parse it easily
+		jsonBytes, _ := json.Marshal(results)
+		fmt.Println(string(jsonBytes))
+	} else {
+		// Human-readable table
+		fmt.Printf("\nKeyword Check Results for: %s\n", inputPath)
+		fmt.Println(strings.Repeat("-", 40))
+		for _, k := range keywords {
+			status := "✘ Missing"
+			if results[k] {
+				status = "✓ Found"
+			}
+			fmt.Printf("%-25s %s\n", k, status)
+		}
+		fmt.Println(strings.Repeat("-", 40))
+		fmt.Printf("Summary: %d/%d keywords present\n", foundCount, len(keywords))
+	}
+
+	// Exit with 1 if any are missing
+	if foundCount < len(keywords) {
+		os.Exit(1)
+	}
 }
 
 func readJSONRecords(path string) ([]map[string]string, error) {

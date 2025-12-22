@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
 	"regexp"
 	"strings"
 )
@@ -174,4 +176,74 @@ func getMapKeys(m map[string]string) []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func ValidateKeywords(inputPath string, keywords []string) (map[string]bool, error) {
+	reader, err := zip.OpenReader(inputPath)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	results := make(map[string]bool)
+	for _, k := range keywords {
+		results[k] = false
+	}
+
+	for _, file := range reader.File {
+		// Optimization: only read text-heavy XML files
+		if !strings.HasPrefix(file.Name, "word/") || !strings.HasSuffix(file.Name, ".xml") {
+			continue
+		}
+
+		rc, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		content, _ := io.ReadAll(rc)
+		rc.Close()
+
+		contentStr := string(content)
+		for _, k := range keywords {
+			if !results[k] && strings.Contains(contentStr, k) {
+				results[k] = true
+			}
+		}
+	}
+	return results, nil
+}
+
+func CheckKeywordsInFile(file *zip.File, keywords []string, results map[string]bool) error {
+	// 1. Optimization: Only open files that contain text
+	// Word docs store text in document.xml, headers, and footers
+	if !strings.HasPrefix(file.Name, "word/") || !strings.HasSuffix(file.Name, ".xml") {
+		return nil
+	}
+
+	rc, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+
+	content, err := io.ReadAll(rc)
+	if err != nil {
+		return err
+	}
+
+	contentStr := string(content)
+
+	// 2. Check for each keyword
+	for _, k := range keywords {
+		// If already found in a previous file, skip to save time
+		if results[k] {
+			continue
+		}
+
+		if strings.Contains(contentStr, k) {
+			results[k] = true
+		}
+	}
+
+	return nil
 }
