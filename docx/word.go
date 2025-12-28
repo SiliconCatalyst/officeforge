@@ -31,7 +31,7 @@ func ProcessDocxSingle(inputPath, outputPath, keyword, replacement string) error
 
 	// Process each file in the DOCX
 	for _, file := range reader.File {
-		err := internal.ProcessZipFile(file, zipWriter, replacements)
+		err := internal.ProcessDocxZipFile(file, zipWriter, replacements)
 		if err != nil {
 			return fmt.Errorf("failed to process file %s: %v", file.Name, err)
 		}
@@ -59,7 +59,7 @@ func ProcessDocxMulti(inputPath, outputPath string, replacements map[string]stri
 
 	// Process each file in the DOCX
 	for _, file := range reader.File {
-		err := internal.ProcessZipFile(file, zipWriter, replacements)
+		err := internal.ProcessDocxZipFile(file, zipWriter, replacements)
 		if err != nil {
 			return fmt.Errorf("failed to process file %s: %v", file.Name, err)
 		}
