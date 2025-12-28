@@ -138,11 +138,11 @@ func ValidatePattern(pattern string, sampleRecord map[string]string) error {
 }
 
 // CreateNamingFunction creates the appropriate naming function based on the pattern
-func CreateNamingFunction(pattern string) func(map[string]string, int) string {
+func createNamingFunction(pattern, baseName, extension string) func(map[string]string, int) string {
 	if pattern == "" {
-		// Default naming
+		// Default naming using the provided base and extension
 		return func(record map[string]string, index int) string {
-			return fmt.Sprintf("document_%d.docx", index)
+			return fmt.Sprintf("%s_%d%s", baseName, index, extension)
 		}
 	}
 
@@ -150,23 +150,33 @@ func CreateNamingFunction(pattern string) func(map[string]string, int) string {
 
 	switch patternType {
 	case PatternTypeSequential:
-		// For sequential patterns, use fmt.Sprintf with the index
 		return func(record map[string]string, index int) string {
 			return fmt.Sprintf(pattern, index)
 		}
 
 	case PatternTypeData:
-		// For data patterns, replace placeholders
 		return func(record map[string]string, index int) string {
 			return ReplacePlaceholders(pattern, record, index)
 		}
 
 	default:
-		// Fallback to default naming
+		// Fallback
 		return func(record map[string]string, index int) string {
-			return fmt.Sprintf("document_%d.docx", index)
+			return fmt.Sprintf("%s_%d%s", baseName, index, extension)
 		}
 	}
+}
+
+func CreateDocxNamingFunction(pattern string) func(map[string]string, int) string {
+	return createNamingFunction(pattern, "document", ".docx")
+}
+
+func CreatePptxNamingFunction(pattern string) func(map[string]string, int) string {
+	return createNamingFunction(pattern, "presentation", ".pptx")
+}
+
+func CreateXlsxNamingFunction(pattern string) func(map[string]string, int) string {
+	return createNamingFunction(pattern, "spreadsheet", ".xlsx")
 }
 
 // getMapKeys returns all keys from a map as a slice (helper for error messages)

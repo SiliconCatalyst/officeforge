@@ -87,7 +87,7 @@ func ProcessDocxMultipleRecords(inputPath, outputDir string, records []map[strin
 	}
 
 	// Create naming function based on pattern
-	nameFunc := internal.CreateNamingFunction(fileNamePattern)
+	nameFunc := internal.CreateDocxNamingFunction(fileNamePattern)
 
 	for i, record := range records {
 		// Generate filename using the naming function
