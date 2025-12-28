@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/siliconcatalyst/officeforge/docx"
+	"github.com/siliconcatalyst/officeforge/xlsx"
 )
 
-func TestProcessDocxSingle(t *testing.T) {
-	templatePath := "testdata/template.docx"
-	outputPath := "testdata/output/single_output.docx"
+func TestProcessXlsxSingle(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
+	outputPath := "testdata/output/single_output.xlsx"
 
 	// Ensure output directory exists
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
@@ -26,9 +26,9 @@ func TestProcessDocxSingle(t *testing.T) {
 	}
 
 	// Test single replacement
-	err := docx.ProcessDocxSingle(templatePath, outputPath, "{{NAME}}", "Alice Williams")
+	err := xlsx.ProcessXlsxSingle(templatePath, outputPath, "{{NAME}}", "Alice Williams")
 	if err != nil {
-		t.Fatalf("ProcessDocxSingle failed: %v", err)
+		t.Fatalf("ProcessXlsxSingle failed: %v", err)
 	}
 
 	// Verify output file was created
@@ -37,12 +37,12 @@ func TestProcessDocxSingle(t *testing.T) {
 	}
 
 	// Read and verify content
-	content, err := readDocxContent(outputPath)
+	content, err := readXlsxContent(outputPath)
 	if err != nil {
 		t.Fatalf("Failed to read output content: %v", err)
 	}
 
-	// Check if replacement occurred (look for the value, not the placeholder)
+	// Check if replacement occurred
 	if !strings.Contains(content, "Alice Williams") {
 		t.Errorf("Replacement 'Alice Williams' not found in output")
 	}
@@ -55,9 +55,9 @@ func TestProcessDocxSingle(t *testing.T) {
 	t.Logf("\033[32m✓ Single replacement test passed\033[0m")
 }
 
-func TestProcessDocxSingleMissingKeyword(t *testing.T) {
-	templatePath := "testdata/template.docx"
-	outputPath := "testdata/output/single_missing.docx"
+func TestProcessXlsxSingleMissingKeyword(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
+	outputPath := "testdata/output/single_missing.xlsx"
 
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
 		t.Fatalf("Failed to create output directory: %v", err)
@@ -65,9 +65,9 @@ func TestProcessDocxSingleMissingKeyword(t *testing.T) {
 	defer os.RemoveAll("testdata/output")
 
 	// Test with keyword that doesn't exist in template
-	err := docx.ProcessDocxSingle(templatePath, outputPath, "{{NONEXISTENT}}", "Some Value")
+	err := xlsx.ProcessXlsxSingle(templatePath, outputPath, "{{NONEXISTENT}}", "Some Value")
 	if err != nil {
-		t.Fatalf("ProcessDocxSingle failed: %v", err)
+		t.Fatalf("ProcessXlsxSingle failed: %v", err)
 	}
 
 	// File should still be created
@@ -78,8 +78,8 @@ func TestProcessDocxSingleMissingKeyword(t *testing.T) {
 	t.Logf("\033[33m⚠ Missing keyword handled gracefully\033[0m")
 }
 
-func TestProcessDocxSingleInvalidTemplate(t *testing.T) {
-	outputPath := "testdata/output/invalid_output.docx"
+func TestProcessXlsxSingleInvalidTemplate(t *testing.T) {
+	outputPath := "testdata/output/invalid_output.xlsx"
 
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
 		t.Fatalf("Failed to create output directory: %v", err)
@@ -87,7 +87,7 @@ func TestProcessDocxSingleInvalidTemplate(t *testing.T) {
 	defer os.RemoveAll("testdata/output")
 
 	// Test with non-existent template
-	err := docx.ProcessDocxSingle("nonexistent.docx", outputPath, "{{NAME}}", "Test")
+	err := xlsx.ProcessXlsxSingle("nonexistent.xlsx", outputPath, "{{NAME}}", "Test")
 	if err == nil {
 		t.Fatalf("Expected error for non-existent template, got nil")
 	}
@@ -95,9 +95,9 @@ func TestProcessDocxSingleInvalidTemplate(t *testing.T) {
 	t.Logf("\033[36m✓ Invalid template error handled: %v\033[0m", err)
 }
 
-func TestProcessDocxMulti(t *testing.T) {
-	templatePath := "testdata/template.docx"
-	outputPath := "testdata/output/multi_output.docx"
+func TestProcessXlsxMulti(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
+	outputPath := "testdata/output/multi_output.xlsx"
 
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
 		t.Fatalf("Failed to create output directory: %v", err)
@@ -119,9 +119,9 @@ func TestProcessDocxMulti(t *testing.T) {
 		"{{SALARY}}":     "$120,000",
 	}
 
-	err := docx.ProcessDocxMulti(templatePath, outputPath, replacements)
+	err := xlsx.ProcessXlsxMulti(templatePath, outputPath, replacements)
 	if err != nil {
-		t.Fatalf("ProcessDocxMulti failed: %v", err)
+		t.Fatalf("ProcessXlsxMulti failed: %v", err)
 	}
 
 	if !fileExists(outputPath) {
@@ -129,7 +129,7 @@ func TestProcessDocxMulti(t *testing.T) {
 	}
 
 	// Read and verify content
-	content, err := readDocxContent(outputPath)
+	content, err := readXlsxContent(outputPath)
 	if err != nil {
 		t.Fatalf("Failed to read output content: %v", err)
 	}
@@ -152,9 +152,9 @@ func TestProcessDocxMulti(t *testing.T) {
 	t.Logf("\033[32m✓ Multiple replacements test passed\033[0m")
 }
 
-func TestProcessDocxMultiEmptyReplacements(t *testing.T) {
-	templatePath := "testdata/template.docx"
-	outputPath := "testdata/output/multi_empty.docx"
+func TestProcessXlsxMultiEmptyReplacements(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
+	outputPath := "testdata/output/multi_empty.xlsx"
 
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
 		t.Fatalf("Failed to create output directory: %v", err)
@@ -162,9 +162,9 @@ func TestProcessDocxMultiEmptyReplacements(t *testing.T) {
 	defer os.RemoveAll("testdata/output")
 
 	// Test with empty replacements map
-	err := docx.ProcessDocxMulti(templatePath, outputPath, map[string]string{})
+	err := xlsx.ProcessXlsxMulti(templatePath, outputPath, map[string]string{})
 	if err != nil {
-		t.Fatalf("ProcessDocxMulti with empty replacements failed: %v", err)
+		t.Fatalf("ProcessXlsxMulti with empty replacements failed: %v", err)
 	}
 
 	if !fileExists(outputPath) {
@@ -174,8 +174,8 @@ func TestProcessDocxMultiEmptyReplacements(t *testing.T) {
 	t.Logf("\033[32m✓ Empty replacements handled gracefully\033[0m")
 }
 
-func TestProcessDocxMultipleRecords(t *testing.T) {
-	templatePath := "testdata/template.docx"
+func TestProcessXlsxMultipleRecords(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
 	outputDir := "testdata/output/batch"
 
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -209,15 +209,15 @@ func TestProcessDocxMultipleRecords(t *testing.T) {
 		},
 	}
 
-	filePattern := "contract_%d.docx"
+	filePattern := "report_%d.xlsx"
 
-	err := docx.ProcessDocxMultipleRecords(templatePath, outputDir, records, filePattern)
+	err := xlsx.ProcessXlsxMultipleRecords(templatePath, outputDir, records, filePattern)
 	if err != nil {
-		t.Fatalf("ProcessDocxMultipleRecords failed: %v", err)
+		t.Fatalf("ProcessXlsxMultipleRecords failed: %v", err)
 	}
 
 	// Verify all files were created
-	expectedFiles := []string{"contract_1.docx", "contract_2.docx"}
+	expectedFiles := []string{"report_1.xlsx", "report_2.xlsx"}
 	for _, filename := range expectedFiles {
 		path := filepath.Join(outputDir, filename)
 		if !fileExists(path) {
@@ -226,7 +226,7 @@ func TestProcessDocxMultipleRecords(t *testing.T) {
 	}
 
 	// Verify content of first file
-	content, err := readDocxContent(filepath.Join(outputDir, "contract_1.docx"))
+	content, err := readXlsxContent(filepath.Join(outputDir, "report_1.xlsx"))
 	if err != nil {
 		t.Fatalf("Failed to read first output: %v", err)
 	}
@@ -238,8 +238,8 @@ func TestProcessDocxMultipleRecords(t *testing.T) {
 	t.Logf("\033[32m✓ Batch processing with pattern test passed\033[0m")
 }
 
-func TestProcessDocxMultipleRecordsDefaultNaming(t *testing.T) {
-	templatePath := "testdata/template.docx"
+func TestProcessXlsxMultipleRecordsDefaultNaming(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
 	outputDir := "testdata/output/batch_default"
 
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -253,13 +253,13 @@ func TestProcessDocxMultipleRecordsDefaultNaming(t *testing.T) {
 	}
 
 	// Test with empty pattern (should use default naming)
-	err := docx.ProcessDocxMultipleRecords(templatePath, outputDir, records, "")
+	err := xlsx.ProcessXlsxMultipleRecords(templatePath, outputDir, records, "")
 	if err != nil {
-		t.Fatalf("ProcessDocxMultipleRecords with default naming failed: %v", err)
+		t.Fatalf("ProcessXlsxMultipleRecords with default naming failed: %v", err)
 	}
 
 	// Verify default naming pattern
-	expectedFiles := []string{"document_1.docx", "document_2.docx"}
+	expectedFiles := []string{"spreadsheet_1.xlsx", "spreadsheet_2.xlsx"}
 	for _, filename := range expectedFiles {
 		path := filepath.Join(outputDir, filename)
 		if !fileExists(path) {
@@ -270,8 +270,8 @@ func TestProcessDocxMultipleRecordsDefaultNaming(t *testing.T) {
 	t.Logf("\033[32m✓ Batch processing with default naming test passed\033[0m")
 }
 
-func TestProcessDocxMultipleRecordsWithNames(t *testing.T) {
-	templatePath := "testdata/template.docx"
+func TestProcessXlsxMultipleRecordsWithNames(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
 	outputDir := "testdata/output/batch_custom"
 
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -289,19 +289,19 @@ func TestProcessDocxMultipleRecordsWithNames(t *testing.T) {
 	nameFunc := func(record map[string]string, index int) string {
 		name := strings.ReplaceAll(record["{{NAME}}"], " ", "_")
 		company := strings.ReplaceAll(record["{{COMPANY}}"], " ", "_")
-		return fmt.Sprintf("%s_%s_contract.docx", name, company)
+		return fmt.Sprintf("%s_%s_report.xlsx", name, company)
 	}
 
-	err := docx.ProcessDocxMultipleRecordsWithNames(templatePath, outputDir, records, nameFunc)
+	err := xlsx.ProcessXlsxMultipleRecordsWithNames(templatePath, outputDir, records, nameFunc)
 	if err != nil {
-		t.Fatalf("ProcessDocxMultipleRecordsWithNames failed: %v", err)
+		t.Fatalf("ProcessXlsxMultipleRecordsWithNames failed: %v", err)
 	}
 
 	// Verify custom named files were created
 	expectedFiles := []string{
-		"Alice_TechCorp_contract.docx",
-		"Bob_StartupInc_contract.docx",
-		"Charlie_MegaCorp_contract.docx",
+		"Alice_TechCorp_report.xlsx",
+		"Bob_StartupInc_report.xlsx",
+		"Charlie_MegaCorp_report.xlsx",
 	}
 
 	for _, filename := range expectedFiles {
@@ -314,8 +314,8 @@ func TestProcessDocxMultipleRecordsWithNames(t *testing.T) {
 	t.Logf("\033[32m✓ Batch processing with custom naming test passed\033[0m")
 }
 
-func TestProcessDocxMultipleRecordsEmptyRecords(t *testing.T) {
-	templatePath := "testdata/template.docx"
+func TestProcessXlsxMultipleRecordsEmptyRecords(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
 	outputDir := "testdata/output/batch_empty"
 
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -324,9 +324,9 @@ func TestProcessDocxMultipleRecordsEmptyRecords(t *testing.T) {
 	defer os.RemoveAll("testdata/output")
 
 	// Test with empty records slice
-	err := docx.ProcessDocxMultipleRecords(templatePath, outputDir, []map[string]string{}, "test_%d.docx")
+	err := xlsx.ProcessXlsxMultipleRecords(templatePath, outputDir, []map[string]string{}, "test_%d.xlsx")
 	if err != nil {
-		t.Fatalf("ProcessDocxMultipleRecords with empty records failed: %v", err)
+		t.Fatalf("ProcessXlsxMultipleRecords with empty records failed: %v", err)
 	}
 
 	// Should create directory but no files
@@ -338,9 +338,9 @@ func TestProcessDocxMultipleRecordsEmptyRecords(t *testing.T) {
 	t.Logf("\033[32m✓ Empty records handled gracefully\033[0m")
 }
 
-func TestProcessDocxSpecialCharacters(t *testing.T) {
-	templatePath := "testdata/template.docx"
-	outputPath := "testdata/output/special_chars.docx"
+func TestProcessXlsxSpecialCharacters(t *testing.T) {
+	templatePath := "testdata/template.xlsx"
+	outputPath := "testdata/output/special_chars.xlsx"
 
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
 		t.Fatalf("Failed to create output directory: %v", err)
@@ -355,16 +355,16 @@ func TestProcessDocxSpecialCharacters(t *testing.T) {
 		"{{SALARY}}":  "$1,234,567.89",
 	}
 
-	err := docx.ProcessDocxMulti(templatePath, outputPath, replacements)
+	err := xlsx.ProcessXlsxMulti(templatePath, outputPath, replacements)
 	if err != nil {
-		t.Fatalf("ProcessDocxMulti with special chars failed: %v", err)
+		t.Fatalf("ProcessXlsxMulti with special chars failed: %v", err)
 	}
 
 	if !fileExists(outputPath) {
 		t.Fatalf("Output file was not created")
 	}
 
-	content, err := readDocxContent(outputPath)
+	content, err := readXlsxContent(outputPath)
 	if err != nil {
 		t.Fatalf("Failed to read output: %v", err)
 	}
@@ -378,8 +378,8 @@ func TestProcessDocxSpecialCharacters(t *testing.T) {
 }
 
 // Benchmark tests
-func BenchmarkProcessDocxSingle(b *testing.B) {
-	templatePath := "testdata/template.docx"
+func BenchmarkProcessXlsxSingle(b *testing.B) {
+	templatePath := "testdata/template.xlsx"
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
 		b.Fatalf("Failed to create output directory: %v", err)
 	}
@@ -387,15 +387,15 @@ func BenchmarkProcessDocxSingle(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		outputPath := fmt.Sprintf("testdata/output/bench_%d.docx", i)
-		if err := docx.ProcessDocxSingle(templatePath, outputPath, "{{NAME}}", "Benchmark User"); err != nil {
+		outputPath := fmt.Sprintf("testdata/output/bench_%d.xlsx", i)
+		if err := xlsx.ProcessXlsxSingle(templatePath, outputPath, "{{NAME}}", "Benchmark User"); err != nil {
 			b.Fatalf("Benchmark failed: %v", err)
 		}
 	}
 }
 
-func BenchmarkProcessDocxMulti(b *testing.B) {
-	templatePath := "testdata/template.docx"
+func BenchmarkProcessXlsxMulti(b *testing.B) {
+	templatePath := "testdata/template.xlsx"
 	if err := os.MkdirAll("testdata/output", 0755); err != nil {
 		b.Fatalf("Failed to create output directory: %v", err)
 	}
@@ -411,8 +411,8 @@ func BenchmarkProcessDocxMulti(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		outputPath := fmt.Sprintf("testdata/output/bench_multi_%d.docx", i)
-		if err := docx.ProcessDocxMulti(templatePath, outputPath, replacements); err != nil {
+		outputPath := fmt.Sprintf("testdata/output/bench_multi_%d.xlsx", i)
+		if err := xlsx.ProcessXlsxMulti(templatePath, outputPath, replacements); err != nil {
 			b.Fatalf("Benchmark failed: %v", err)
 		}
 	}
