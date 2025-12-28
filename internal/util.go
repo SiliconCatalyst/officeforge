@@ -178,7 +178,7 @@ func getMapKeys(m map[string]string) []string {
 	return keys
 }
 
-func ValidateKeywords(inputPath string, keywords []string) (map[string]bool, error) {
+func ValidateDocxKeywords(inputPath string, keywords []string) (map[string]bool, error) {
 	reader, err := zip.OpenReader(inputPath)
 	if err != nil {
 		return nil, err
@@ -213,37 +213,75 @@ func ValidateKeywords(inputPath string, keywords []string) (map[string]bool, err
 	return results, nil
 }
 
-func CheckKeywordsInFile(file *zip.File, keywords []string, results map[string]bool) error {
-	// 1. Optimization: Only open files that contain text
-	// Word docs store text in document.xml, headers, and footers
-	if !strings.HasPrefix(file.Name, "word/") || !strings.HasSuffix(file.Name, ".xml") {
-		return nil
-	}
-
-	rc, err := file.Open()
+func ValidatePptxKeywords(inputPath string, keywords []string) (map[string]bool, error) {
+	reader, err := zip.OpenReader(inputPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer rc.Close()
+	defer reader.Close()
 
-	content, err := io.ReadAll(rc)
-	if err != nil {
-		return err
-	}
-
-	contentStr := string(content)
-
-	// 2. Check for each keyword
+	results := make(map[string]bool)
 	for _, k := range keywords {
-		// If already found in a previous file, skip to save time
-		if results[k] {
+		results[k] = false
+	}
+
+	for _, file := range reader.File {
+		// PPTX slide content is inside the "ppt/slides/" folder
+		if !strings.HasPrefix(file.Name, "ppt/slides/") || !strings.HasSuffix(file.Name, ".xml") {
 			continue
 		}
 
-		if strings.Contains(contentStr, k) {
-			results[k] = true
+		rc, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		content, _ := io.ReadAll(rc)
+		rc.Close()
+
+		contentStr := string(content)
+		for _, k := range keywords {
+			if !results[k] && strings.Contains(contentStr, k) {
+				results[k] = true
+			}
 		}
 	}
+	return results, nil
+}
 
-	return nil
+func ValidateXlsxKeywords(inputPath string, keywords []string) (map[string]bool, error) {
+	reader, err := zip.OpenReader(inputPath)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	results := make(map[string]bool)
+	for _, k := range keywords {
+		results[k] = false
+	}
+
+	for _, file := range reader.File {
+		// Check both individual worksheets and the shared strings table
+		isWorksheet := strings.HasPrefix(file.Name, "xl/worksheets/") && strings.HasSuffix(file.Name, ".xml")
+		isSharedStrings := file.Name == "xl/sharedStrings.xml"
+
+		if !isWorksheet && !isSharedStrings {
+			continue
+		}
+
+		rc, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		content, _ := io.ReadAll(rc)
+		rc.Close()
+
+		contentStr := string(content)
+		for _, k := range keywords {
+			if !results[k] && strings.Contains(contentStr, k) {
+				results[k] = true
+			}
+		}
+	}
+	return results, nil
 }
