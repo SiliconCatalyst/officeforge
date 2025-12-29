@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -50,6 +52,8 @@ func handleDocxSingle(args []string) {
 		fmt.Println("Error: All flags (--input, --output, --key, --value) are required")
 		os.Exit(1)
 	}
+
+	keyword = internal.NormalizeKey(keyword)
 
 	err := docx.ProcessDocxSingle(inputPath, outputPath, keyword, replacement)
 	if err != nil {
@@ -108,6 +112,8 @@ func handleDocxMulti(args []string) {
 		fmt.Printf("Error parsing JSON: %v\n", err)
 		os.Exit(1)
 	}
+
+	replacements = internal.NormalizeReplacements(replacements)
 
 	err = docx.ProcessDocxMulti(inputPath, outputPath, replacements)
 	if err != nil {
@@ -195,9 +201,14 @@ func handleDocxBatch(args []string) {
 		os.Exit(1)
 	}
 
+	normalizedRecords := make([]map[string]string, len(records))
+	for i, record := range records {
+		normalizedRecords[i] = internal.NormalizeReplacements(record)
+	}
+
 	// Validate pattern if provided
 	if pattern != "" {
-		if err := internal.ValidatePattern(pattern, records[0]); err != nil {
+		if err := internal.ValidatePattern(pattern, normalizedRecords[0]); err != nil {
 			fmt.Printf("Error: Invalid pattern - %v\n", err)
 			os.Exit(1)
 		}
@@ -214,7 +225,7 @@ func handleDocxBatch(args []string) {
 	}
 
 	// Process documents using the pattern
-	err = docx.ProcessDocxMultipleRecords(inputPath, outputDir, records, pattern)
+	err = docx.ProcessDocxMultipleRecords(inputPath, outputDir, normalizedRecords, pattern)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
@@ -270,23 +281,57 @@ func handleDocxCheck(args []string) {
 			fmt.Printf("Error reading data file: %v\n", err)
 			os.Exit(1)
 		}
-		// Try parsing as array first, then as map keys
-		var keyList []string
-		if err := json.Unmarshal(data, &keyList); err == nil {
-			keywords = keyList
+
+		// Check for CSV support via file extension
+		if strings.HasSuffix(strings.ToLower(dataPath), ".csv") {
+			reader := csv.NewReader(bytes.NewReader(data))
+			headers, err := reader.Read() // Reads the first row (the headers)
+			if err != nil {
+				fmt.Printf("Error parsing CSV headers: %v\n", err)
+				os.Exit(1)
+			}
+			keywords = headers
 		} else {
-			var keyMap map[string]interface{}
-			if err := json.Unmarshal(data, &keyMap); err == nil {
-				for k := range keyMap {
-					keywords = append(keywords, k)
+			// JSON Logic: Try parsing as an array of objects (starts with [)
+			var dataList []map[string]any
+			if err := json.Unmarshal(data, &dataList); err == nil {
+				if len(dataList) > 0 {
+					for k := range dataList[0] {
+						keywords = append(keywords, k)
+					}
+				}
+			} else {
+				// Try parsing as a single object (starts with {)
+				var keyMap map[string]any
+				if err := json.Unmarshal(data, &keyMap); err == nil {
+					for k := range keyMap {
+						keywords = append(keywords, k)
+					}
+				} else {
+					// Try parsing as a simple array of strings (starts with ["str"])
+					var keyList []string
+					if err := json.Unmarshal(data, &keyList); err == nil {
+						keywords = keyList
+					}
 				}
 			}
 		}
+
+		// Validation to ensure keywords were actually extracted
+		if len(keywords) == 0 {
+			fmt.Println("Error: No keywords found. Check if your CSV has headers or if your JSON is formatted correctly.")
+			os.Exit(1)
+		}
 	} else {
+		// Existing logic for comma-separated --keys flag
 		keywords = strings.Split(keysString, ",")
 		for i := range keywords {
 			keywords[i] = strings.TrimSpace(keywords[i])
 		}
+	}
+
+	for i := range keywords {
+		keywords[i] = internal.NormalizeKey(keywords[i])
 	}
 
 	// Call the validation function

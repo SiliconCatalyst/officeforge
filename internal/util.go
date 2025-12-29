@@ -14,7 +14,7 @@ type PatternType int
 const (
 	PatternTypeUnknown    PatternType = iota
 	PatternTypeSequential             // Uses %d format (e.g., "file_%d.docx")
-	PatternTypeData                   // Uses {FIELD} placeholders (e.g., "{NAME}_contract.docx")
+	PatternTypeData                   // Uses {{FIELD}} placeholders (e.g., "{{NAME}}_contract.docx")
 )
 
 // DetectPatternType determines what type of pattern string is being used
@@ -36,19 +36,19 @@ func DetectPatternType(pattern string) PatternType {
 	return PatternTypeUnknown
 }
 
-// ReplacePlaceholders replaces {FIELD} placeholders with values from the record
-// Supports {FIELD} for any record key and {INDEX} for the record number
+// ReplacePlaceholders replaces {{FIELD}} placeholders with values from the record
+// Supports {{FIELD}} for any record key and {{INDEX}} for the record number
 func ReplacePlaceholders(pattern string, record map[string]string, index int) string {
 	result := pattern
 
 	// Replace all {KEY} placeholders with corresponding record values
 	for key, value := range record {
-		placeholder := fmt.Sprintf("{%s}", key)
+		placeholder := fmt.Sprintf("%s", key)
 		result = strings.ReplaceAll(result, placeholder, value)
 	}
 
 	// Support {INDEX} for the record number
-	result = strings.ReplaceAll(result, "{INDEX}", fmt.Sprintf("%d", index))
+	result = strings.ReplaceAll(result, "{{INDEX}}", fmt.Sprintf("%d", index))
 
 	// Sanitize the filename
 	result = SanitizeFilename(result)
@@ -80,18 +80,18 @@ func SanitizeFilename(filename string) string {
 }
 
 // ExtractPlaceholders returns all placeholder names found in a pattern
-// Example: "{NAME}_{ID}.docx" returns ["NAME", "ID"]
+// Example: "{{NAME}}_{{ID}}.docx" returns ["NAME", "ID"]
 func ExtractPlaceholders(pattern string) []string {
-	re := regexp.MustCompile(`\{([^}]+)\}`)
+	re := regexp.MustCompile(`\{\{([^}]+)\}\}`)
 	matches := re.FindAllStringSubmatch(pattern, -1)
 
 	placeholders := make([]string, 0, len(matches))
 	for _, match := range matches {
 		if len(match) > 1 {
-			placeholders = append(placeholders, match[1])
+			// Return just the field name without braces
+			placeholders = append(placeholders, "{{"+match[1]+"}}")
 		}
 	}
-
 	return placeholders
 }
 
@@ -115,23 +115,23 @@ func ValidatePattern(pattern string, sampleRecord map[string]string) error {
 		// Check that all placeholders exist in the sample record
 		placeholders := ExtractPlaceholders(pattern)
 		if len(placeholders) == 0 {
-			return fmt.Errorf("data pattern must contain at least one {FIELD} placeholder")
+			return fmt.Errorf("data pattern must contain at least one {{FIELD}} placeholder")
 		}
 
-		// Validate placeholders against sample record (skip {INDEX} as it's built-in)
+		// Validate placeholders against sample record (skip {{INDEX}} as it's built-in)
 		for _, placeholder := range placeholders {
 			if placeholder == "INDEX" {
 				continue
 			}
 			if _, exists := sampleRecord[placeholder]; !exists {
-				return fmt.Errorf("placeholder {%s} not found in data fields. Available fields: %v",
+				return fmt.Errorf("placeholder %s not found in data fields. Available fields: %v",
 					placeholder, getMapKeys(sampleRecord))
 			}
 		}
 		return nil
 
 	case PatternTypeUnknown:
-		return fmt.Errorf("pattern must contain either {FIELD} placeholders or %%d for sequential numbering")
+		return fmt.Errorf("pattern must contain: {{FIELD}}, {{INDEX}} placeholders or %%d for sequential numbering")
 	}
 
 	return nil
@@ -294,4 +294,26 @@ func ValidateXlsxKeywords(inputPath string, keywords []string) (map[string]bool,
 		}
 	}
 	return results, nil
+}
+
+// NormalizeKey ensures a key has double braces
+// "CLIENT_NAME" -> "{{CLIENT_NAME}}"
+// "{{CLIENT_NAME}}" -> "{{CLIENT_NAME}}"
+func NormalizeKey(key string) string {
+	// Already has braces
+	if strings.HasPrefix(key, "{{") && strings.HasSuffix(key, "}}") {
+		return key
+	}
+	// Add braces
+	return fmt.Sprintf("{{%s}}", key)
+}
+
+// NormalizeReplacements converts all keys in a map to have double braces
+// This allows users to provide data with or without braces
+func NormalizeReplacements(replacements map[string]string) map[string]string {
+	normalized := make(map[string]string, len(replacements))
+	for key, value := range replacements {
+		normalized[NormalizeKey(key)] = value
+	}
+	return normalized
 }
