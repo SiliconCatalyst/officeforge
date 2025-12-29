@@ -28,17 +28,28 @@ jobs:
 
             - name: Build binaries
               run: |
+                  # Calculate the date
+                  RELEASE_DATE=$(date +'%d - %B - %Y')
+
+                  # Get the short commit hash
+                  COMMIT_HASH=$(git rev-parse --short HEAD)
+
+                  # Create the linker flags for all three variables
+                  LDFLAGS="-X main.Version=${{ github.ref_name }} \
+                           -X 'main.BuildDate=$RELEASE_DATE' \
+                           -X main.Commit=$COMMIT_HASH"
+
                   # Windows
-                  GOOS=windows GOARCH=amd64 go build -ldflags "-X main.Version=${{ github.ref_name }}" -o officeforge-windows-amd64.exe ./cmd/officeforge
-                  GOOS=windows GOARCH=arm64 go build -ldflags "-X main.Version=${{ github.ref_name }}" -o officeforge-windows-arm64.exe ./cmd/officeforge
+                  GOOS=windows GOARCH=amd64 go build -ldflags "$LDFLAGS" -o officeforge-windows-amd64.exe ./cmd/officeforge
+                  GOOS=windows GOARCH=arm64 go build -ldflags "$LDFLAGS" -o officeforge-windows-arm64.exe ./cmd/officeforge
 
                   # Linux
-                  GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=${{ github.ref_name }}" -o officeforge-linux-amd64 ./cmd/officeforge
-                  GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=${{ github.ref_name }}" -o officeforge-linux-arm64 ./cmd/officeforge
+                  GOOS=linux GOARCH=amd64 go build -ldflags "$LDFLAGS" -o officeforge-linux-amd64 ./cmd/officeforge
+                  GOOS=linux GOARCH=arm64 go build -ldflags "$LDFLAGS" -o officeforge-linux-arm64 ./cmd/officeforge
 
                   # macOS (Darwin)
-                  GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=${{ github.ref_name }}" -o officeforge-darwin-amd64 ./cmd/officeforge
-                  GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=${{ github.ref_name }}" -o officeforge-darwin-arm64 ./cmd/officeforge
+                  GOOS=darwin GOARCH=amd64 go build -ldflags "$LDFLAGS" -o officeforge-darwin-amd64 ./cmd/officeforge
+                  GOOS=darwin GOARCH=arm64 go build -ldflags "$LDFLAGS" -o officeforge-darwin-arm64 ./cmd/officeforge
 
             - name: Generate checksums
               run: |
