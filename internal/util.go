@@ -43,8 +43,7 @@ func ReplacePlaceholders(pattern string, record map[string]string, index int) st
 
 	// Replace all {KEY} placeholders with corresponding record values
 	for key, value := range record {
-		placeholder := fmt.Sprintf("%s", key)
-		result = strings.ReplaceAll(result, placeholder, value)
+		result = strings.ReplaceAll(result, key, value)
 	}
 
 	// Support {INDEX} for the record number
