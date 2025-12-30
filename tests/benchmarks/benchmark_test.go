@@ -10,7 +10,10 @@ import (
 )
 
 func TestRealWorldPerformance(t *testing.T) {
-	os.MkdirAll("testdata/output", 0755)
+	err := os.MkdirAll("testdata/output", 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer os.RemoveAll("testdata/output")
 
 	// Your actual template keywords
@@ -80,10 +83,13 @@ func BenchmarkDocxContract(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		docx.ProcessDocxMulti(
+		err := docx.ProcessDocxMulti(
 			"../testdata/template.docx",
 			fmt.Sprintf("testdata/output/bench_%d.docx", i),
 			replacements,
 		)
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }
