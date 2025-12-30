@@ -132,9 +132,9 @@ func handlePptxBatch(args []string) {
 		fmt.Println("  officeforge pptx-batch --input <template> --output <directory> --data <csv_or_json_file> [--pattern <pattern>]")
 		fmt.Println("\nPattern examples:")
 		fmt.Printf("  --pattern \"presentation_%%d.pptx\"       Sequential: presentation_1.pptx, presentation_2.pptx\n")
-		fmt.Println("  --pattern \"{NAME}_slides.pptx\"        From data: Alice_slides.pptx, Bob_slides.pptx")
-		fmt.Println("  --pattern \"{ID}_{COMPANY}.pptx\"       Multiple fields: 001_Acme.pptx, 002_TechCorp.pptx")
-		fmt.Println("  --pattern \"{NAME}_{INDEX}.pptx\"       Combine data and index: Alice_1.pptx, Bob_2.pptx")
+		fmt.Println("  --pattern \"{{NAME}}_slides.pptx\"        From data: Alice_slides.pptx, Bob_slides.pptx")
+		fmt.Println("  --pattern \"{{ID}}_{{COMPANY}}.pptx\"       Multiple fields: 001_Acme.pptx, 002_TechCorp.pptx")
+		fmt.Println("  --pattern \"{{NAME}}_{{INDEX}}.pptx\"       Combine data and index: Alice_1.pptx, Bob_2.pptx")
 		os.Exit(1)
 	}
 

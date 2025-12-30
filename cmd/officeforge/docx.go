@@ -132,9 +132,9 @@ func handleDocxBatch(args []string) {
 		fmt.Println("  officeforge docx-batch --input <template> --output <directory> --data <csv_or_json_file> [--pattern <pattern>]")
 		fmt.Println("\nPattern examples:")
 		fmt.Printf("  --pattern \"contract_%%d.docx\"           Sequential: contract_1.docx, contract_2.docx\n")
-		fmt.Println("  --pattern \"{NAME}_contract.docx\"      From data: Alice_contract.docx, Bob_contract.docx")
-		fmt.Println("  --pattern \"{ID}_{COMPANY}.docx\"       Multiple fields: 001_Acme.docx, 002_TechCorp.docx")
-		fmt.Println("  --pattern \"{NAME}_{INDEX}.docx\"       Combine data and index: Alice_1.docx, Bob_2.docx")
+		fmt.Println("  --pattern \"{{NAME}}_contract.docx\"      From data: Alice_contract.docx, Bob_contract.docx")
+		fmt.Println("  --pattern \"{{ID}}_{{COMPANY}}.docx\"       Multiple fields: 001_Acme.docx, 002_TechCorp.docx")
+		fmt.Println("  --pattern \"{{NAME}}_{{INDEX}}.docx\"       Combine data and index: Alice_1.docx, Bob_2.docx")
 		os.Exit(1)
 	}
 

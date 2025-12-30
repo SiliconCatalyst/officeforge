@@ -132,9 +132,9 @@ func handleXlsxBatch(args []string) {
 		fmt.Println("  officeforge xlsx-batch --input <template> --output <directory> --data <csv_or_json_file> [--pattern <pattern>]")
 		fmt.Println("\nPattern examples:")
 		fmt.Printf("  --pattern \"report_%%d.xlsx\"             Sequential: report_1.xlsx, report_2.xlsx\n")
-		fmt.Println("  --pattern \"{NAME}_report.xlsx\"        From data: Alice_report.xlsx, Bob_report.xlsx")
-		fmt.Println("  --pattern \"{ID}_{COMPANY}.xlsx\"       Multiple fields: 001_Acme.xlsx, 002_TechCorp.xlsx")
-		fmt.Println("  --pattern \"{NAME}_{INDEX}.xlsx\"       Combine data and index: Alice_1.xlsx, Bob_2.xlsx")
+		fmt.Println("  --pattern \"{{NAME}}_report.xlsx\"        From data: Alice_report.xlsx, Bob_report.xlsx")
+		fmt.Println("  --pattern \"{{ID}}_{{COMPANY}}.xlsx\"       Multiple fields: 001_Acme.xlsx, 002_TechCorp.xlsx")
+		fmt.Println("  --pattern \"{{NAME}}_{{INDEX}}.xlsx\"       Combine data and index: Alice_1.xlsx, Bob_2.xlsx")
 		os.Exit(1)
 	}
 

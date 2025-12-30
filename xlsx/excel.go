@@ -67,7 +67,7 @@ func ProcessXlsxMulti(inputPath, outputPath string, replacements map[string]stri
 		}
 	}
 
-	log.Printf("Successfully processed %d replacements in %s", len(replacements), outputPath)
+	// log.Printf("Successfully processed %d replacements in %s", len(replacements), outputPath)
 	return nil
 }
 
@@ -103,10 +103,10 @@ func ProcessXlsxMultipleRecords(inputPath, outputDir string, records []map[strin
 			continue
 		}
 
-		log.Printf("Successfully created: %s", outputPath)
+		// log.Printf("Successfully created: %s", outputPath)
 	}
 
-	log.Printf("Successfully processed %d records", len(records))
+	// log.Printf("Successfully processed %d records", len(records))
 	return nil
 }
 
@@ -127,9 +127,9 @@ func ProcessXlsxMultipleRecordsWithNames(inputPath, outputDir string, records []
 			continue
 		}
 
-		log.Printf("Successfully created: %s", outputPath)
+		// log.Printf("Successfully created: %s", outputPath)
 	}
 
-	log.Printf("Successfully processed %d records", len(records))
+	// log.Printf("Successfully processed %d records", len(records))
 	return nil
 }
