@@ -305,9 +305,11 @@ go test ./...
 - [x] Excel (XLSX) support
 - [x] PowerPoint (PPTX) support
 - [x] CLI tool with batch processing
-- [ ] Image insertion
-- [ ] Chart manipulation
-- [ ] Package managers (Homebrew, Chocolatey)
+- [ ] Target Headers/Footer
+- [ ] Dynamic table rows (Add/Remove)
+- [ ] Shape-to-image replacement
+- [ ] Modify chart source data and re-render
+- [ ] Document metadata
 
 ## License
 
